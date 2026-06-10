@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.22.1)
+project("stayscout_keys")
+add_library(stayscout_keys SHARED keys.cpp)
+find_library(log-lib log)
+target_link_libraries(stayscout_keys ${log-lib})

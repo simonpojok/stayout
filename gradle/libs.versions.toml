@@ -27,6 +27,7 @@ foundation = "1.11.2"
 navigationRuntimeKtx = "2.9.8"
 navigationComposeVersion = "2.9.8"
 room = "2.7.1"
+sqlcipher = "4.5.4"
 ktlintGradle = "14.2.0"
 detekt = "2.0.0-alpha.3"
 composeRules = "0.6.0"
@@ -75,6 +76,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlcipher = { group = "net.zetetic", name = "android-database-sqlcipher", version.ref = "sqlcipher" }
 compose-rules-detekt = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "composeRules" }
 compose-rules-ktlint = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "composeRules" }
 

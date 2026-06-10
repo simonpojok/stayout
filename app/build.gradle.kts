@@ -33,6 +33,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        }
+        externalNativeBuild {
+            cmake {
+                cppFlags += "-std=c++17"
+            }
+        }
     }
 
     buildTypes {
@@ -58,13 +67,21 @@ android {
 
         release {
             val props = loadProperties("config/release.properties")
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
             resValue("string", "app_name", "StayScout")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
         }
     }
 
@@ -85,6 +102,7 @@ android {
         buildConfig = true
         resValues = true
     }
+    ndkVersion = "27.0.12077973"
 }
 
 dependencies {
