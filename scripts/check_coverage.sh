@@ -76,6 +76,10 @@ is_excluded() {
     [[ "$name" == "GetExchangeRatesUseCase"     ]] && return 0
     [[ "$name" == "GetPropertiesUseCase"        ]] && return 0
     [[ "$name" == "ObserveNetworkStatusUseCase" ]] && return 0
+    # JNI bridge — only external fun declarations, UnsatisfiedLinkError in JVM tests
+    [[ "$name" == "NativeKeys"               ]] && return 0
+    # Android Keystore provider unavailable in JVM unit tests
+    [[ "$name" == "KeystorePassphraseCipher" ]] && return 0
     return 1
 }
 
