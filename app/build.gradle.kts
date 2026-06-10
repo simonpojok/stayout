@@ -1,14 +1,28 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
+
+fun loadProperties(filePath: String): Properties =
+    Properties().apply {
+        rootProject
+            .file(filePath)
+            .takeIf { it.exists() }
+            ?.inputStream()
+            ?.use { load(it) }
+    }
 
 android {
     namespace = "com.example.stayscout"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version =
+            release(36) {
+                minorApiLevel = 1
+            }
     }
 
     defaultConfig {
@@ -22,37 +36,72 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
+            val props = loadProperties("config/debug.properties")
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-Debug"
+            isDebuggable = true
+            buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
+            resValue("string", "app_name", "StayScout Debug")
+        }
+
+        create("qa") {
+            val props = loadProperties("config/qa.properties")
+            applicationIdSuffix = ".qa"
+            versionNameSuffix = "-QA"
+            isDebuggable = false
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
+            resValue("string", "app_name", "StayScout QA")
+            signingConfig = signingConfigs.getByName("debug")
+        }
+
+        release {
+            val props = loadProperties("config/release.properties")
+            isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
+            resValue("string", "app_name", "StayScout")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+        }
+    }
+
     buildFeatures {
         compose = true
+        buildConfig = true
+        resValues = true
     }
 }
 
 dependencies {
+    implementation(project(":stayout-presentation"))
+    implementation(project(":stayout-data"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
+    ksp(libs.hilt.compiler)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

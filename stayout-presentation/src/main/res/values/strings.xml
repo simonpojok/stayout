@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Error state -->
+    <string name="error_title">Something went wrong</string>
+    <string name="error_retry">Retry</string>
+
+    <!-- Empty state -->
+    <string name="empty_search_title">No matches found</string>
+    <string name="empty_search_message">No properties match \"%1$s\". Try a different search.</string>
+    <string name="empty_properties_title">No properties available</string>
+    <string name="empty_properties_message">There are no properties to show right now.</string>
+
+    <!-- Property card -->
+    <string name="property_card_price_format">From €%1$s / night</string>
+    <string name="property_base_price_format">%1$s%2$s</string>
+    <string name="cd_property_card_format">%1$s, rated %2$s out of 10</string>
+    <string name="cd_property_image_format">%1$s image</string>
+
+    <!-- Featured badge -->
+    <string name="badge_featured">Featured</string>
+
+    <!-- List screen -->
+    <string name="cd_switch_to_light_mode">Switch to light mode</string>
+    <string name="cd_switch_to_dark_mode">Switch to dark mode</string>
+    <string name="search_placeholder">Search properties…</string>
+    <string name="cd_clear_search">Clear search</string>
+
+    <!-- Detail screen -->
+    <string name="label_price_per_night">Price per night</string>
+    <string name="label_per_night">per night</string>
+    <string name="label_rates_unavailable">Exchange rates unavailable — showing EUR only</string>
+    <string name="label_free_cancellation">Free Cancellation Available</string>
+    <string name="label_about">About</string>
+    <string name="label_facilities">Facilities</string>
+    <string name="cd_hero_image_format">%1$s hero image</string>
+    <string name="cd_back">Back</string>
+</resources>
