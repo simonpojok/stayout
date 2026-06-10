@@ -1,0 +1,41 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts}]
+max_line_length = 120
+ktlint_function_naming_ignore_when_annotated_with = Composable
+
+# Compose Rules (io.nlopez.compose.rules) — enable the core checks
+ktlint_compose_compositionlocal-allowlist = enabled
+ktlint_compose_compositionlocal-naming = enabled
+ktlint_compose_content-emitter-returning-values-check = enabled
+ktlint_compose_content-slot-reused = enabled
+ktlint_compose_content-trailing-lambda = enabled
+ktlint_compose_modifier-clickable-order = enabled
+ktlint_compose_modifier-missing-check = enabled
+ktlint_compose_modifier-naming = enabled
+ktlint_compose_modifier-not-used-at-root = enabled
+ktlint_compose_modifier-reused-check = enabled
+ktlint_compose_modifier-without-default-check = enabled
+ktlint_compose_multiple-emitters-check = enabled
+ktlint_compose_mutable-params-check = enabled
+ktlint_compose_mutable-state-autoboxing = enabled
+ktlint_compose_mutable-state-param-check = enabled
+ktlint_compose_naming-check = enabled
+ktlint_compose_param-order-check = enabled
+ktlint_compose_remember-missing-check = enabled
+ktlint_compose_vm-forwarding-check = enabled
+ktlint_compose_vm-injection-check = enabled
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

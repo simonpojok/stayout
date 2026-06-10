@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ── JAVA_HOME ──────────────────────────────────────────────────────────────────
+if [ -z "${JAVA_HOME:-}" ]; then
+    ANDROID_STUDIO_JBR="/Users/simonpojok/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+    if [ -d "$ANDROID_STUDIO_JBR" ]; then
+        export JAVA_HOME="$ANDROID_STUDIO_JBR"
+    fi
+fi
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# ── 1. BRANCH NAME CHECK ──────────────────────────────────────────────────────
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+PROTECTED_BRANCHES="^(main|master|develop)$"
+BRANCH_PATTERN="^MOBI-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$"
+
+if echo "$BRANCH" | grep -qE "$PROTECTED_BRANCHES"; then
+    echo "❌  Direct commits to '$BRANCH' are not allowed."
+    echo "    Create a branch: MOBI-<ticket>-<short-description>"
+    exit 1
+fi
+
+if ! echo "$BRANCH" | grep -qE "$BRANCH_PATTERN"; then
+    echo "❌  Branch name '$BRANCH' does not match required pattern."
+    echo "    Expected: MOBI-<ticket>-<kebab-description>  (e.g. MOBI-1234-fix-login-crash)"
+    exit 1
+fi
+
+echo "✅  Branch name OK: $BRANCH"
+
+# ── 2. KTLINT FORMAT + RE-STAGE ───────────────────────────────────────────────
+echo "🔍  Running ktlintFormat..."
+STAGED_KT=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.kts?$' || true)
+
+./gradlew ktlintFormat -q
+
+if [ -n "$STAGED_KT" ]; then
+    while IFS= read -r f; do
+        [ -f "$f" ] && git add "$f"
+    done <<< "$STAGED_KT"
+fi
+
+echo "✅  ktlintFormat OK"
+
+# ── 3. DETEKT ─────────────────────────────────────────────────────────────────
+echo "🔍  Running detekt..."
+./gradlew detekt -q
+echo "✅  detekt OK"
+
+# ── 4. UNIT TESTS ─────────────────────────────────────────────────────────────
+echo "🧪  Running unit tests..."
+./gradlew testDebugUnitTest -q
+echo "✅  Tests passed"
+
+# ── 5. COVERAGE GATE ──────────────────────────────────────────────────────────
+echo "📊  Checking coverage..."
+./gradlew koverXmlReport -q
+bash "$REPO_ROOT/scripts/check_coverage.sh" --min-coverage 90
+echo "✅  Coverage OK"

@@ -24,3 +24,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "StayScout"
 include(":app")
+include(":stayout-domain")
+include(":stayout-presentation")
+include(":stayout-data")

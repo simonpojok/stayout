@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG="$(head -1 "$COMMIT_MSG_FILE")"
+COMMIT_PATTERN="^MOBI-[0-9]+: .+"
+
+if ! echo "$COMMIT_MSG" | grep -qE "$COMMIT_PATTERN"; then
+    echo "❌  Commit message does not match required format."
+    echo "    Expected: MOBI-<ticket>: <summary>  (e.g. MOBI-1234: fix login crash)"
+    echo "    Got:      $COMMIT_MSG"
+    exit 1
+fi
+
+echo "✅  Commit message OK"
