@@ -1,16 +1,14 @@
 package com.example.stayout.data.di
 
-import com.example.stayout.data.local.mapper.ExchangeRatesDomainToEntityMapper
-import com.example.stayout.data.local.mapper.ExchangeRatesEntityToDomainMapper
-import com.example.stayout.data.local.mapper.LocationDomainToEntityMapper
-import com.example.stayout.data.local.mapper.LocationEntityToDomainMapper
-import com.example.stayout.data.local.mapper.PropertyDomainToEntityMapper
-import com.example.stayout.data.local.mapper.PropertyEntityToDomainMapper
+import com.example.stayout.data.mapper.AddressToDomainMapper
+import com.example.stayout.data.mapper.CommentToDomainMapper
+import com.example.stayout.data.mapper.CompanyToDomainMapper
 import com.example.stayout.data.mapper.ExchangeRatesToDomainMapper
 import com.example.stayout.data.mapper.FacilityCategoryToDomainMapper
 import com.example.stayout.data.mapper.LocationToDomainMapper
 import com.example.stayout.data.mapper.PropertiesResponseToDomainMapper
 import com.example.stayout.data.mapper.PropertyToDomainMapper
+import com.example.stayout.data.mapper.UserToDomainMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,7 +17,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object MapperModule {
+object RemoteMapperModule {
     @Provides
     @Singleton
     fun provideFacilityCategoryToDomainMapper(): FacilityCategoryToDomainMapper = FacilityCategoryToDomainMapper()
@@ -44,31 +42,23 @@ object MapperModule {
     @Singleton
     fun provideExchangeRatesToDomainMapper(): ExchangeRatesToDomainMapper = ExchangeRatesToDomainMapper()
 
-    // --- Entity mappers ---
+    @Provides
+    @Singleton
+    fun provideAddressToDomainMapper(): AddressToDomainMapper = AddressToDomainMapper()
 
     @Provides
     @Singleton
-    fun provideLocationEntityToDomainMapper(): LocationEntityToDomainMapper = LocationEntityToDomainMapper()
+    fun provideCompanyToDomainMapper(): CompanyToDomainMapper = CompanyToDomainMapper()
 
     @Provides
     @Singleton
-    fun provideLocationDomainToEntityMapper(): LocationDomainToEntityMapper = LocationDomainToEntityMapper()
+    fun provideUserToDomainMapper(
+        addressMapper: AddressToDomainMapper,
+        companyMapper: CompanyToDomainMapper,
+    ): UserToDomainMapper = UserToDomainMapper(addressMapper, companyMapper)
 
     @Provides
     @Singleton
-    fun providePropertyEntityToDomainMapper(): PropertyEntityToDomainMapper = PropertyEntityToDomainMapper()
-
-    @Provides
-    @Singleton
-    fun providePropertyDomainToEntityMapper(): PropertyDomainToEntityMapper = PropertyDomainToEntityMapper()
-
-    @Provides
-    @Singleton
-    fun provideExchangeRatesEntityToDomainMapper(): ExchangeRatesEntityToDomainMapper =
-        ExchangeRatesEntityToDomainMapper()
-
-    @Provides
-    @Singleton
-    fun provideExchangeRatesDomainToEntityMapper(): ExchangeRatesDomainToEntityMapper =
-        ExchangeRatesDomainToEntityMapper()
+    fun provideCommentToDomainMapper(userMapper: UserToDomainMapper): CommentToDomainMapper =
+        CommentToDomainMapper(userMapper)
 }

@@ -51,6 +51,7 @@ android {
             versionNameSuffix = "-Debug"
             isDebuggable = true
             buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
+            buildConfigField("String", "JSON_PLACEHOLDER_BASE_URL", "\"${props["JSON_PLACEHOLDER_BASE_URL"]}\"")
             resValue("string", "app_name", "StayScout Debug")
         }
 
@@ -61,6 +62,7 @@ android {
             isDebuggable = false
             isMinifyEnabled = false
             buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
+            buildConfigField("String", "JSON_PLACEHOLDER_BASE_URL", "\"${props["JSON_PLACEHOLDER_BASE_URL"]}\"")
             resValue("string", "app_name", "StayScout QA")
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -70,6 +72,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
+            buildConfigField("String", "JSON_PLACEHOLDER_BASE_URL", "\"${props["JSON_PLACEHOLDER_BASE_URL"]}\"")
             resValue("string", "app_name", "StayScout")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

@@ -2,6 +2,7 @@ package com.example.stayscout.di
 
 import com.example.stayout.data.di.BaseUrl
 import com.example.stayout.data.di.IsDebug
+import com.example.stayout.data.di.JsonPlaceholderBaseUrl
 import com.example.stayscout.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -18,4 +19,8 @@ object AppModule {
     @Provides
     @IsDebug
     fun provideIsDebug(): Boolean = BuildConfig.DEBUG
+
+    @Provides
+    @JsonPlaceholderBaseUrl
+    fun provideJsonPlaceholderBaseUrl(): String = BuildConfig.JSON_PLACEHOLDER_BASE_URL
 }
