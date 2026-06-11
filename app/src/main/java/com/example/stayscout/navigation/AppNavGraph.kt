@@ -9,36 +9,27 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.stayout.presentation.detail.PropertyDetailEvent
 import com.example.stayout.presentation.detail.PropertyDetailScreen
-import com.example.stayout.presentation.list.PropertyListEvent
-import com.example.stayout.presentation.list.PropertyListScreen
-
-private const val ROUTE_LIST = "list"
-private const val ROUTE_DETAIL = "detail/{propertyId}"
-private const val ARG_PROPERTY_ID = "propertyId"
+import com.example.stayout.presentation.home.HomeScreen
 
 @Composable
-fun AppNavGraph(
-    onToggleTheme: () -> Unit,
-    navController: NavHostController = rememberNavController(),
-) {
+fun AppNavGraph(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
-        startDestination = ROUTE_LIST,
+        startDestination = Screen.List.route,
     ) {
-        composable(ROUTE_LIST) {
-            PropertyListScreen(
-                onEvent = { event ->
-                    when (event) {
-                        is PropertyListEvent.NavigateToDetail ->
-                            navController.navigate("detail/${event.propertyId}")
-                        PropertyListEvent.ToggleTheme -> onToggleTheme()
-                    }
+        composable(Screen.List.route) {
+            HomeScreen(
+                onNavigateToDetail = { propertyId ->
+                    navController.navigate(Screen.Detail.createRoute(propertyId))
                 },
             )
         }
         composable(
-            route = ROUTE_DETAIL,
-            arguments = listOf(navArgument(ARG_PROPERTY_ID) { type = NavType.IntType }),
+            route = Screen.Detail.route,
+            arguments =
+                listOf(
+                    navArgument(Screen.Detail.ARG_PROPERTY_ID) { type = NavType.IntType },
+                ),
         ) {
             PropertyDetailScreen(
                 onEvent = { event ->

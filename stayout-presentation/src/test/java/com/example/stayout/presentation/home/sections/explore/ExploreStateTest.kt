@@ -1,4 +1,4 @@
-package com.example.stayout.presentation.list
+package com.example.stayout.presentation.home.sections.explore
 
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
@@ -8,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.math.BigDecimal
 
-class PropertyListStateTest {
+class ExploreStateTest {
     private val location = LocationDomainModel("Dublin", "Ireland")
 
     private fun property(
@@ -39,100 +39,78 @@ class PropertyListStateTest {
 
     @Test
     fun `displayedProperties returns paged results when search query is blank`() {
-        val state =
-            PropertyListState.Success(
-                location = location,
-                allProperties = properties,
-                pageEnd = 2,
-            )
-
+        val state = ExploreState.Success(location = location, allProperties = properties, pageEnd = 2)
         assertEquals(properties.take(2), state.displayedProperties)
     }
 
     @Test
     fun `displayedProperties returns matching results when search query is set`() {
         val state =
-            PropertyListState.Success(
+            ExploreState.Success(
                 location = location,
                 allProperties = properties,
                 pageEnd = 2,
                 searchQuery = "Kinlay",
             )
-
         assertEquals(listOf(properties[0]), state.displayedProperties)
     }
 
     @Test
     fun `displayedProperties is empty when allProperties is empty`() {
-        val state =
-            PropertyListState.Success(
-                location = location,
-                allProperties = emptyList(),
-                pageEnd = 0,
-            )
-
+        val state = ExploreState.Success(location = location, allProperties = emptyList(), pageEnd = 0)
         assertTrue(state.displayedProperties.isEmpty())
     }
 
     @Test
     fun `displayedProperties is empty when search query has no matches`() {
         val state =
-            PropertyListState.Success(
+            ExploreState.Success(
                 location = location,
                 allProperties = properties,
                 pageEnd = 2,
                 searchQuery = "Nonexistent",
             )
-
         assertTrue(state.displayedProperties.isEmpty())
     }
 
     @Test
     fun `canLoadMore is true when search is blank and more pages remain`() {
-        val state =
-            PropertyListState.Success(
-                location = location,
-                allProperties = properties,
-                pageEnd = 2,
-            )
-
+        val state = ExploreState.Success(location = location, allProperties = properties, pageEnd = 2)
         assertTrue(state.canLoadMore)
     }
 
     @Test
     fun `canLoadMore is false when pageEnd reaches the end of the list`() {
         val state =
-            PropertyListState.Success(
+            ExploreState.Success(
                 location = location,
                 allProperties = properties,
                 pageEnd = properties.size,
             )
-
         assertFalse(state.canLoadMore)
     }
 
     @Test
     fun `canLoadMore is false when a search query is active`() {
         val state =
-            PropertyListState.Success(
+            ExploreState.Success(
                 location = location,
                 allProperties = properties,
                 pageEnd = 1,
                 searchQuery = "Kinlay",
             )
-
         assertFalse(state.canLoadMore)
     }
 
     @Test
     fun `Loading state is distinct singleton`() {
-        val state: PropertyListState = PropertyListState.Loading
-        assertTrue(state is PropertyListState.Loading)
+        val state: ExploreState = ExploreState.Loading
+        assertTrue(state is ExploreState.Loading)
     }
 
     @Test
     fun `Error state holds the provided message`() {
-        val state = PropertyListState.Error("Network error")
+        val state = ExploreState.Error("Network error")
         assertEquals("Network error", state.message)
     }
 }

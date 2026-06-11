@@ -7,6 +7,7 @@ import com.example.stayout.domain.usecase.GetExchangeRatesUseCase
 import com.example.stayout.domain.usecase.GetPropertyByIdUseCase
 import com.example.stayout.domain.usecase.ObserveNetworkStatusUseCase
 import com.example.stayout.presentation.base.BaseViewModel
+import com.example.stayout.presentation.util.ugandaHotelLocations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.launchIn
@@ -43,6 +44,10 @@ class PropertyDetailViewModel
                         (this as? PropertyDetailState.Success)?.copy(selectedCurrency = intent.currency) ?: this
                     }
                 PropertyDetailIntent.Retry -> loadData()
+                PropertyDetailIntent.Book -> Unit
+                PropertyDetailIntent.Share -> Unit
+                PropertyDetailIntent.Favorite -> Unit
+                PropertyDetailIntent.Location -> Unit
             }
         }
 
@@ -82,6 +87,7 @@ class PropertyDetailViewModel
                     PropertyDetailState.Success(
                         property = property,
                         rates = rates,
+                        mapLocation = ugandaHotelLocations.random(),
                         ratesUnavailable = ratesResult.isFailure,
                     )
                 }

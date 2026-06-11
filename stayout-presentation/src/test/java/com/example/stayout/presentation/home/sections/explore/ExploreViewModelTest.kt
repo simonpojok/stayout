@@ -1,4 +1,4 @@
-package com.example.stayout.presentation.list
+package com.example.stayout.presentation.home.sections.explore
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
@@ -26,7 +26,7 @@ import org.junit.Test
 import java.math.BigDecimal
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PropertyListViewModelTest {
+class ExploreViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val getPropertiesUseCase: GetPropertiesUseCase = mockk()
@@ -53,14 +53,14 @@ class PropertyListViewModelTest {
             )
         }
 
-    private lateinit var viewModel: PropertyListViewModel
+    private lateinit var viewModel: ExploreViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         coEvery { getPropertiesUseCase() } returns Result.success(location to properties)
         coEvery { observeNetworkStatusUseCase() } returns flowOf(true)
-        viewModel = PropertyListViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
+        viewModel = ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
     }
 
     @After
@@ -70,7 +70,7 @@ class PropertyListViewModelTest {
 
     @Test
     fun `initial load transitions to Success state with first page`() {
-        val state = viewModel.state.value as PropertyListState.Success
+        val state = viewModel.state.value as ExploreState.Success
 
         assertEquals(location, state.location)
         assertEquals(properties, state.allProperties)
@@ -81,11 +81,11 @@ class PropertyListViewModelTest {
     fun `load failure transitions to Error state`() {
         coEvery { getPropertiesUseCase() } returns Result.failure(RuntimeException("Network error"))
 
-        val failingVm = PropertyListViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
+        val failingVm = ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
         val state = failingVm.state.value
 
-        assertTrue(state is PropertyListState.Error)
-        assertEquals("Network error", (state as PropertyListState.Error).message)
+        assertTrue(state is ExploreState.Error)
+        assertEquals("Network error", (state as ExploreState.Error).message)
     }
 
     @Test
@@ -110,9 +110,9 @@ class PropertyListViewModelTest {
             )
         coEvery { getPropertiesUseCase() } returns Result.success(location to newProperties)
 
-        viewModel.onIntent(PropertyListIntent.Refresh)
+        viewModel.onIntent(ExploreIntent.Refresh)
 
-        val state = viewModel.state.value as PropertyListState.Success
+        val state = viewModel.state.value as ExploreState.Success
         assertEquals(newProperties, state.allProperties)
         assertFalse(state.isRefreshing)
     }
@@ -121,22 +121,22 @@ class PropertyListViewModelTest {
     fun `refresh failure clears isRefreshing flag`() {
         coEvery { getPropertiesUseCase() } returns Result.failure(RuntimeException("Refresh failed"))
 
-        viewModel.onIntent(PropertyListIntent.Refresh)
+        viewModel.onIntent(ExploreIntent.Refresh)
 
-        val state = viewModel.state.value as PropertyListState.Success
+        val state = viewModel.state.value as ExploreState.Success
         assertFalse(state.isRefreshing)
     }
 
     @Test
     fun `LoadMore expands the page after delay`() =
         runTest(testDispatcher) {
-            val state = viewModel.state.value as PropertyListState.Success
+            val state = viewModel.state.value as ExploreState.Success
             assertEquals(6, state.displayedProperties.size)
 
-            viewModel.onIntent(PropertyListIntent.LoadMore)
+            viewModel.onIntent(ExploreIntent.LoadMore)
             advanceTimeBy(601)
 
-            val updated = viewModel.state.value as PropertyListState.Success
+            val updated = viewModel.state.value as ExploreState.Success
             assertEquals(10, updated.displayedProperties.size)
             assertFalse(updated.isLoadingMore)
         }
@@ -147,13 +147,13 @@ class PropertyListViewModelTest {
             val freshDispatcher = UnconfinedTestDispatcher(testScheduler)
             Dispatchers.setMain(freshDispatcher)
 
-            val vm = PropertyListViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
-            val before = vm.state.value as PropertyListState.Success
+            val vm = ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
+            val before = vm.state.value as ExploreState.Success
             assertTrue(before.canLoadMore)
 
-            vm.onIntent(PropertyListIntent.LoadMore)
+            vm.onIntent(ExploreIntent.LoadMore)
 
-            val loading = vm.state.value as PropertyListState.Success
+            val loading = vm.state.value as ExploreState.Success
             assertTrue(loading.isLoadingMore)
         }
 
@@ -162,46 +162,37 @@ class PropertyListViewModelTest {
         runTest(testDispatcher) {
             val property = properties[0]
 
-            viewModel.onIntent(PropertyListIntent.SelectProperty(property))
+            viewModel.onIntent(ExploreIntent.SelectProperty(property))
 
             val event = viewModel.events.first()
-            assertTrue(event is PropertyListEvent.NavigateToDetail)
-            assertEquals(property.id, (event as PropertyListEvent.NavigateToDetail).propertyId)
+            assertTrue(event is ExploreEvent.NavigateToDetail)
+            assertEquals(property.id, (event as ExploreEvent.NavigateToDetail).propertyId)
         }
 
     @Test
     fun `UpdateSearch filters displayed properties`() {
-        viewModel.onIntent(PropertyListIntent.UpdateSearch("Property 3"))
+        viewModel.onIntent(ExploreIntent.UpdateSearch("Property 3"))
 
-        val state = viewModel.state.value as PropertyListState.Success
+        val state = viewModel.state.value as ExploreState.Success
         assertEquals(1, state.displayedProperties.size)
         assertEquals("Property 3", state.displayedProperties[0].name)
     }
 
     @Test
     fun `UpdateSearch with blank query restores paged results`() {
-        viewModel.onIntent(PropertyListIntent.UpdateSearch("Property 1"))
-        viewModel.onIntent(PropertyListIntent.UpdateSearch(""))
+        viewModel.onIntent(ExploreIntent.UpdateSearch("Property 1"))
+        viewModel.onIntent(ExploreIntent.UpdateSearch(""))
 
-        val state = viewModel.state.value as PropertyListState.Success
+        val state = viewModel.state.value as ExploreState.Success
         assertEquals(6, state.displayedProperties.size)
     }
-
-    @Test
-    fun `ToggleTheme emits ToggleTheme event`() =
-        runTest(testDispatcher) {
-            viewModel.onIntent(PropertyListIntent.ToggleTheme)
-
-            val event = viewModel.events.first()
-            assertTrue(event is PropertyListEvent.ToggleTheme)
-        }
 
     @Test
     fun `network offline status updates isOffline in Success state`() {
         coEvery { observeNetworkStatusUseCase() } returns flowOf(false)
 
-        val offlineVm = PropertyListViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
-        val state = offlineVm.state.value as PropertyListState.Success
+        val offlineVm = ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
+        val state = offlineVm.state.value as ExploreState.Success
         assertTrue(state.isOffline)
     }
 
@@ -218,13 +209,13 @@ class PropertyListViewModelTest {
 
     @Test
     fun `LoadMore intent is ignored when canLoadMore is false`() {
-        viewModel.onIntent(PropertyListIntent.UpdateSearch("Property 1"))
-        val stateBeforeLoad = viewModel.state.value as PropertyListState.Success
+        viewModel.onIntent(ExploreIntent.UpdateSearch("Property 1"))
+        val stateBeforeLoad = viewModel.state.value as ExploreState.Success
         assertFalse(stateBeforeLoad.canLoadMore)
 
-        viewModel.onIntent(PropertyListIntent.LoadMore)
+        viewModel.onIntent(ExploreIntent.LoadMore)
 
-        val stateAfter = viewModel.state.value as PropertyListState.Success
+        val stateAfter = viewModel.state.value as ExploreState.Success
         assertFalse(stateAfter.isLoadingMore)
     }
 }

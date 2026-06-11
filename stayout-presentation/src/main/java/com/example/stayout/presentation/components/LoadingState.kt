@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -69,12 +69,13 @@ private fun ShimmerCardStatic() {
 @Composable
 internal fun ShimmerCard(alpha: Float) {
     val shimmerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
-    Card(
+    Surface(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Dimens.spacing16, vertical = Dimens.spacing8),
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Column {
             Box(
@@ -84,7 +85,7 @@ internal fun ShimmerCard(alpha: Float) {
                         .height(Dimens.spacing180)
                         .background(shimmerColor),
             )
-            Column(modifier = Modifier.padding(Dimens.spacing16)) {
+            Column(modifier = Modifier.padding(Dimens.spacing12)) {
                 Box(
                     modifier =
                         Modifier

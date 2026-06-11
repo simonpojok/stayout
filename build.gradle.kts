@@ -65,6 +65,10 @@ kover {
                     "*Preview*",
                     "*.BuildConfig",
                 )
+                annotatedBy(
+                    "com.example.stayout.presentation.theme.PreviewThemes",
+                    "androidx.compose.ui.tooling.preview.Preview",
+                )
                 packages(
                     "com.example.stayout.*.di",
                     "com.example.stayscout.di",

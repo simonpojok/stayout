@@ -179,6 +179,42 @@ class PropertyDetailViewModelTest {
     }
 
     @Test
+    fun `Book intent does not change state`() {
+        val before = viewModel.state.value
+
+        viewModel.onIntent(PropertyDetailIntent.Book)
+
+        assertEquals(before, viewModel.state.value)
+    }
+
+    @Test
+    fun `Share intent does not change state`() {
+        val before = viewModel.state.value
+
+        viewModel.onIntent(PropertyDetailIntent.Share)
+
+        assertEquals(before, viewModel.state.value)
+    }
+
+    @Test
+    fun `Favorite intent does not change state`() {
+        val before = viewModel.state.value
+
+        viewModel.onIntent(PropertyDetailIntent.Favorite)
+
+        assertEquals(before, viewModel.state.value)
+    }
+
+    @Test
+    fun `Location intent does not change state`() {
+        val before = viewModel.state.value
+
+        viewModel.onIntent(PropertyDetailIntent.Location)
+
+        assertEquals(before, viewModel.state.value)
+    }
+
+    @Test
     fun `SelectCurrency is ignored when state is not Success`() {
         coEvery { getPropertyByIdUseCase(propertyId) } returns null
         val vm =

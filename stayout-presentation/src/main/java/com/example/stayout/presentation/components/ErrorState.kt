@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.example.stayout.presentation.R
+import com.example.stayout.presentation.components.button.PrimaryButton
 import com.example.stayout.presentation.theme.Dimens
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
@@ -56,9 +56,10 @@ fun ErrorState(
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(Dimens.spacing24))
-        Button(onClick = onRetry) {
-            Text(stringResource(R.string.error_retry))
-        }
+        PrimaryButton(
+            label = stringResource(R.string.error_retry),
+            onClick = onRetry,
+        )
     }
 }
 

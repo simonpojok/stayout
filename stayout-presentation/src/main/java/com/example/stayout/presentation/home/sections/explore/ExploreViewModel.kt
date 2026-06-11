@@ -1,4 +1,4 @@
-package com.example.stayout.presentation.list
+package com.example.stayout.presentation.home.sections.explore
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -13,38 +13,37 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PropertyListViewModel
+class ExploreViewModel
     @Inject
     constructor(
         private val getPropertiesUseCase: GetPropertiesUseCase,
         private val observeNetworkStatusUseCase: ObserveNetworkStatusUseCase,
         private val savedStateHandle: SavedStateHandle,
-    ) : BaseViewModel<PropertyListState, PropertyListIntent, PropertyListEvent>(
-            initialState = PropertyListState.Loading,
+    ) : BaseViewModel<ExploreState, ExploreIntent, ExploreEvent>(
+            initialState = ExploreState.Loading,
         ) {
         val scrollIndex: Int
             get() = savedStateHandle.get<Int>(KEY_SCROLL_INDEX) ?: 0
 
         init {
-            onIntent(PropertyListIntent.Load)
+            onIntent(ExploreIntent.Load)
             observeNetworkStatus()
         }
 
-        override fun onIntent(intent: PropertyListIntent) {
+        override fun onIntent(intent: ExploreIntent) {
             when (intent) {
-                PropertyListIntent.Load -> loadProperties()
-                PropertyListIntent.Refresh -> refreshProperties()
-                PropertyListIntent.LoadMore -> {
-                    val current = currentState as? PropertyListState.Success ?: return
+                ExploreIntent.Load -> loadProperties()
+                ExploreIntent.Refresh -> refreshProperties()
+                ExploreIntent.LoadMore -> {
+                    val current = currentState as? ExploreState.Success ?: return
                     if (current.canLoadMore && !current.isLoadingMore) loadMore()
                 }
-                is PropertyListIntent.SelectProperty ->
-                    emitEvent(PropertyListEvent.NavigateToDetail(intent.property.id))
-                is PropertyListIntent.UpdateSearch ->
+                is ExploreIntent.SelectProperty ->
+                    emitEvent(ExploreEvent.NavigateToDetail(intent.property.id))
+                is ExploreIntent.UpdateSearch ->
                     updateState {
-                        (this as? PropertyListState.Success)?.copy(searchQuery = intent.query) ?: this
+                        (this as? ExploreState.Success)?.copy(searchQuery = intent.query) ?: this
                     }
-                PropertyListIntent.ToggleTheme -> emitEvent(PropertyListEvent.ToggleTheme)
             }
         }
 
@@ -57,7 +56,7 @@ class PropertyListViewModel
                 observeNetworkStatusUseCase()
                     .onEach { isOnline ->
                         updateState {
-                            (this as? PropertyListState.Success)?.copy(isOffline = !isOnline) ?: this
+                            (this as? ExploreState.Success)?.copy(isOffline = !isOnline) ?: this
                         }
                     }.launchIn(this)
             }
@@ -65,31 +64,31 @@ class PropertyListViewModel
 
         private fun loadProperties() {
             viewModelScope.launch {
-                updateState { PropertyListState.Loading }
+                updateState { ExploreState.Loading }
                 getPropertiesUseCase()
                     .onSuccess { (location, properties) ->
                         updateState {
-                            PropertyListState.Success(
+                            ExploreState.Success(
                                 location = location,
                                 allProperties = properties,
                                 pageEnd = PAGE_SIZE,
                             )
                         }
                     }.onFailure { e ->
-                        updateState { PropertyListState.Error(e.message ?: "Failed to load properties") }
+                        updateState { ExploreState.Error(e.message ?: "Failed to load properties") }
                     }
             }
         }
 
         private fun refreshProperties() {
             updateState {
-                (this as? PropertyListState.Success)?.copy(isRefreshing = true) ?: this
+                (this as? ExploreState.Success)?.copy(isRefreshing = true) ?: this
             }
             viewModelScope.launch {
                 getPropertiesUseCase()
                     .onSuccess { (location, properties) ->
                         updateState {
-                            PropertyListState.Success(
+                            ExploreState.Success(
                                 location = location,
                                 allProperties = properties,
                                 pageEnd = PAGE_SIZE,
@@ -97,7 +96,7 @@ class PropertyListViewModel
                         }
                     }.onFailure {
                         updateState {
-                            (this as? PropertyListState.Success)?.copy(isRefreshing = false) ?: this
+                            (this as? ExploreState.Success)?.copy(isRefreshing = false) ?: this
                         }
                     }
             }
@@ -105,12 +104,12 @@ class PropertyListViewModel
 
         private fun loadMore() {
             updateState {
-                (this as? PropertyListState.Success)?.copy(isLoadingMore = true) ?: this
+                (this as? ExploreState.Success)?.copy(isLoadingMore = true) ?: this
             }
             viewModelScope.launch {
                 delay(LOAD_MORE_DELAY_MS)
                 updateState {
-                    (this as? PropertyListState.Success)?.let { s ->
+                    (this as? ExploreState.Success)?.let { s ->
                         s.copy(
                             pageEnd = minOf(s.pageEnd + PAGE_SIZE, s.allProperties.size),
                             isLoadingMore = false,
