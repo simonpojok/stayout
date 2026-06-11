@@ -23,6 +23,7 @@ subprojects {
         version.set("1.5.0")
         android.set(true)
         ignoreFailures.set(false)
+        outputToConsole.set(true)
         reporters {
             reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
             reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
@@ -64,16 +65,19 @@ kover {
                     "*ComposableSingletons*",
                     "*Preview*",
                     "*.BuildConfig",
+                    "*Migration*",
                 )
                 annotatedBy(
                     "com.example.stayout.presentation.theme.PreviewThemes",
                     "androidx.compose.ui.tooling.preview.Preview",
+                    "androidx.compose.runtime.Composable",
                 )
                 packages(
                     "com.example.stayout.*.di",
                     "com.example.stayscout.di",
                     "com.example.stayout.*.theme",
                     "com.example.stayscout.*.theme",
+                    "com.example.stayout.*.local.migration",
                 )
             }
         }

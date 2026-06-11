@@ -3,9 +3,12 @@ package com.example.stayout.data.di
 import android.content.Context
 import androidx.room.Room
 import com.example.stayout.data.local.StayScoutDatabase
+import com.example.stayout.data.local.dao.CommentDao
 import com.example.stayout.data.local.dao.ExchangeRatesDao
 import com.example.stayout.data.local.dao.LocationDao
 import com.example.stayout.data.local.dao.PropertyDao
+import com.example.stayout.data.local.dao.UserDao
+import com.example.stayout.data.local.migration.Migration1To2
 import com.example.stayout.data.security.DatabasePassphraseRepository
 import dagger.Module
 import dagger.Provides
@@ -31,7 +34,7 @@ object DatabaseModule {
         return Room
             .databaseBuilder(context, StayScoutDatabase::class.java, "stayscout.db")
             .openHelperFactory(factory)
-            .fallbackToDestructiveMigration(false)
+            .addMigrations(Migration1To2())
             .build()
     }
 
@@ -43,4 +46,10 @@ object DatabaseModule {
 
     @Provides
     fun provideExchangeRatesDao(db: StayScoutDatabase): ExchangeRatesDao = db.exchangeRatesDao()
+
+    @Provides
+    fun provideCommentDao(db: StayScoutDatabase): CommentDao = db.commentDao()
+
+    @Provides
+    fun provideUserDao(db: StayScoutDatabase): UserDao = db.userDao()
 }

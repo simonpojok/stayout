@@ -3,6 +3,7 @@ package com.example.stayout.data.di
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.example.stayout.data.remote.api.CommentApi
 import com.example.stayout.data.remote.api.PropertyApi
 import com.example.stayout.data.remote.api.RatesApi
 import com.example.stayout.data.remote.api.StatsApi
@@ -19,6 +20,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -96,4 +98,26 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideStatsApi(retrofit: Retrofit): StatsApi = retrofit.create(StatsApi::class.java)
+
+    @Provides
+    @Singleton
+    @CommentsRetrofit
+    fun provideCommentsRetrofit(
+        @JsonPlaceholderBaseUrl baseUrl: String,
+        client: OkHttpClient,
+        json: Json,
+    ): Retrofit =
+        Retrofit
+            .Builder()
+            .baseUrl(baseUrl)
+            .client(client)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideCommentApi(
+        @CommentsRetrofit retrofit: Retrofit,
+    ): CommentApi = retrofit.create(CommentApi::class.java)
 }

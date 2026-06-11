@@ -21,6 +21,7 @@ lifecycleViewmodelCompose = "2.8.0"
 mockk = "1.13.12"
 robolectric = "4.13"
 kotlinxCoroutines = "1.9.0"
+rxjava3 = "3.1.10"
 jetbrainsKotlinJvm = "2.3.21"
 appcompat = "1.6.1"
 material = "1.10.0"
@@ -83,6 +84,9 @@ sqlcipher = { group = "net.zetetic", name = "android-database-sqlcipher", versio
 compose-rules-detekt = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "composeRules" }
 compose-rules-ktlint = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "composeRules" }
 osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
+rxjava3 = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava3" }
+retrofit-adapter-rxjava3 = { group = "com.squareup.retrofit2", name = "adapter-rxjava3", version.ref = "retrofit" }
+kotlinx-coroutines-rx3 = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-rx3", version.ref = "kotlinxCoroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

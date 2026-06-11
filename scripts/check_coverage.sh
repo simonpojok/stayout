@@ -57,8 +57,11 @@ is_excluded() {
     [[ "$name" == *Activity          ]] && return 0
     [[ "$name" == *Application       ]] && return 0
     [[ "$name" == *Screen            ]] && return 0
+    [[ "$name" == *Section           ]] && return 0
     [[ "$name" == *NavGraph          ]] && return 0
     [[ "$name" == *Database          ]] && return 0
+    # Room migrations — require Android instrumented tests
+    [[ "$path" == */migration/*      ]] && return 0
     # Sealed event/intent types — pure data declarations
     [[ "$name" == *Event             ]] && return 0
     [[ "$name" == *Intent            ]] && return 0

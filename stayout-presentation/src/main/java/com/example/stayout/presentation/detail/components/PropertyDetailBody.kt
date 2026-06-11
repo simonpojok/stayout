@@ -54,6 +54,7 @@ import com.example.stayout.presentation.components.PropertyMapView
 import com.example.stayout.presentation.components.RatingBadge
 import com.example.stayout.presentation.detail.PropertyDetailIntent
 import com.example.stayout.presentation.detail.PropertyDetailState
+import com.example.stayout.presentation.detail.comments.CommentsSection
 import com.example.stayout.presentation.theme.Dimens
 import kotlinx.coroutines.delay
 
@@ -273,6 +274,11 @@ internal fun PropertyDetailBody(
                         .fillMaxWidth()
                         .height(Dimens.spacing200),
             )
+
+            Spacer(modifier = Modifier.height(Dimens.spacing16))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(Dimens.spacing16))
+            CommentsSection(modifier = Modifier.fillMaxWidth())
 
             Spacer(modifier = Modifier.height(Dimens.spacing32))
         }

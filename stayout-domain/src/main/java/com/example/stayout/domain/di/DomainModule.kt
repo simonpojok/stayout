@@ -1,9 +1,12 @@
 package com.example.stayout.domain.di
 
+import com.example.stayout.domain.repository.CommentRepository
 import com.example.stayout.domain.repository.NetworkStatusRepository
 import com.example.stayout.domain.repository.PropertyRepository
 import com.example.stayout.domain.repository.RatesRepository
 import com.example.stayout.domain.repository.StatsRepository
+import com.example.stayout.domain.usecase.GetCommentsUseCase
+import com.example.stayout.domain.usecase.GetCommentsUseCaseImpl
 import com.example.stayout.domain.usecase.GetExchangeRatesUseCase
 import com.example.stayout.domain.usecase.GetExchangeRatesUseCaseImpl
 import com.example.stayout.domain.usecase.GetPropertiesUseCase
@@ -37,4 +40,8 @@ object DomainModule {
     @Provides
     fun provideObserveNetworkStatusUseCase(repository: NetworkStatusRepository): ObserveNetworkStatusUseCase =
         ObserveNetworkStatusUseCaseImpl(repository)
+
+    @Provides
+    fun provideGetCommentsUseCase(repository: CommentRepository): GetCommentsUseCase =
+        GetCommentsUseCaseImpl(repository)
 }
