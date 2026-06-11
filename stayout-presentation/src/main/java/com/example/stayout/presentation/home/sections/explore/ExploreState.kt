@@ -1,11 +1,11 @@
-package com.example.stayout.presentation.list
+package com.example.stayout.presentation.home.sections.explore
 
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.presentation.base.BaseState
 
-sealed interface PropertyListState : BaseState {
-    data object Loading : PropertyListState
+sealed interface ExploreState : BaseState {
+    data object Loading : ExploreState
 
     data class Success(
         val location: LocationDomainModel,
@@ -15,7 +15,7 @@ sealed interface PropertyListState : BaseState {
         val isRefreshing: Boolean = false,
         val isLoadingMore: Boolean = false,
         val isOffline: Boolean = false,
-    ) : PropertyListState {
+    ) : ExploreState {
         val displayedProperties: List<PropertyDomainModel>
             get() =
                 if (searchQuery.isBlank()) {
@@ -30,5 +30,5 @@ sealed interface PropertyListState : BaseState {
 
     data class Error(
         val message: String,
-    ) : PropertyListState
+    ) : ExploreState
 }

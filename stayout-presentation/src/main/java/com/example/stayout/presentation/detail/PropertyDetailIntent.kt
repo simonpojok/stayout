@@ -9,4 +9,12 @@ sealed interface PropertyDetailIntent : BaseIntent {
     ) : PropertyDetailIntent
 
     data object Retry : PropertyDetailIntent
+
+    data object Book : PropertyDetailIntent
+
+    data object Share : PropertyDetailIntent
+
+    data object Favorite : PropertyDetailIntent
+
+    data object Location : PropertyDetailIntent
 }

@@ -15,17 +15,66 @@
     <string name="property_base_price_format">%1$s%2$s</string>
     <string name="cd_property_card_format">%1$s, rated %2$s out of 10</string>
     <string name="cd_property_image_format">%1$s image</string>
+    <string name="badge_free_cancellation">Free cancel</string>
+    <string name="cd_star_rating_format">%1$s out of 5 stars, %2$s reviews</string>
 
     <!-- Featured badge -->
     <string name="badge_featured">Featured</string>
 
-    <!-- List screen -->
+    <!-- List screen / app bar -->
     <string name="cd_switch_to_light_mode">Switch to light mode</string>
     <string name="cd_switch_to_dark_mode">Switch to dark mode</string>
     <string name="search_placeholder">Search properties…</string>
     <string name="cd_clear_search">Clear search</string>
+    <string name="cd_profile">Profile</string>
+    <string name="cd_notifications">Notifications</string>
+    <string name="cd_call">Call support</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_explore">Explore</string>
+    <string name="nav_saved">Saved</string>
+    <string name="nav_bookings">Bookings</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Stub screens -->
+    <string name="coming_soon_saved">Saved — coming soon</string>
+    <string name="coming_soon_bookings">Bookings — coming soon</string>
+    <string name="coming_soon_profile">Profile — coming soon</string>
+
+    <!-- Component showcase -->
+    <string name="showcase_title">Components</string>
+
+    <!-- Bottom action bar -->
+    <string name="btn_book_now">Book Now</string>
+    <string name="cd_share">Share</string>
+    <string name="cd_favorite">Save to favourites</string>
+    <string name="cd_location">Get directions</string>
+
+    <!-- Facility descriptions -->
+    <string name="facility_desc_wifi">Free high-speed Wi-Fi throughout the property — stay connected for work or streaming.</string>
+    <string name="facility_desc_tv">Relax in our TV lounge — catch up on shows or unwind with fellow travellers.</string>
+    <string name="facility_desc_bar">Kick back at our on-site bar with local and international beers, wines, and cocktails.</string>
+    <string name="facility_desc_game">Challenge friends in our game room with board games, consoles, and table sports.</string>
+    <string name="facility_desc_patio">Enjoy our sun-drenched patio — ideal for morning coffee or evening drinks.</string>
+    <string name="facility_desc_reception">Our team is on hand 24/7 to ensure your arrival and stay runs smoothly.</string>
+    <string name="facility_desc_locker">Keep valuables safe in secure lockers sized for everything from laptops to backpacks.</string>
+    <string name="facility_desc_luggage">Store bags securely before check-in or after check-out — explore hands-free.</string>
+    <string name="facility_desc_pool">Cool off in our swimming pool — perfect for a morning lap or a lazy afternoon float.</string>
+    <string name="facility_desc_gym">Well-equipped gym with cardio machines, free weights, and dedicated stretching zones.</string>
+    <string name="facility_desc_kitchen">Fully equipped communal kitchen with hobs, ovens, refrigerators, and all cookware.</string>
+    <string name="facility_desc_parking">Secure on-site parking conveniently located right at the property entrance.</string>
+    <string name="facility_desc_laundry">Self-service laundry with washers, dryers, and detergent — travel light.</string>
+    <string name="facility_desc_cafe">In-house café serving fresh coffee, teas, and light bites throughout the day.</string>
+    <string name="facility_desc_restaurant">Locally inspired dishes and international favourites served morning through evening.</string>
+    <string name="facility_desc_breakfast">Hearty breakfast with hot dishes, pastries, fresh fruit, and a full range of drinks.</string>
+    <string name="facility_desc_shuttle">Airport shuttle between the property and the terminal — safe and on time.</string>
+    <string name="facility_desc_ac">Air conditioning in rooms and key common areas for year-round comfort.</string>
+    <string name="facility_desc_bike">Rent a bike and explore the city at your own pace, discovering hidden local gems.</string>
+    <string name="facility_desc_medical">First-aid facilities and trained staff on hand for health concerns during your stay.</string>
+    <string name="facility_desc_default">This amenity is available on-site to enhance your comfort and ensure a memorable stay.</string>
 
     <!-- Detail screen -->
+    <string name="label_location_map">Location</string>
     <string name="label_price_per_night">Price per night</string>
     <string name="label_per_night">per night</string>
     <string name="label_rates_unavailable">Exchange rates unavailable — showing EUR only</string>

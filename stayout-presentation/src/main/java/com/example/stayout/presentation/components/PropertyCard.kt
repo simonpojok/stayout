@@ -1,15 +1,20 @@
 package com.example.stayout.presentation.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +25,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.core.text.HtmlCompat
 import coil.compose.AsyncImage
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.presentation.R
@@ -43,15 +47,15 @@ fun PropertyCard(
             property.name,
             "%.1f".format(property.rating),
         )
-    Card(
+    Surface(
         modifier =
             modifier
                 .fillMaxWidth()
                 .padding(horizontal = Dimens.spacing16, vertical = Dimens.spacing8)
                 .semantics { contentDescription = cardDescription }
                 .clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.large,
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.spacing2),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Column {
             Box {
@@ -68,20 +72,12 @@ fun PropertyCard(
                     FeaturedBadge(
                         modifier =
                             Modifier
-                                .align(Alignment.TopEnd)
+                                .align(Alignment.TopStart)
                                 .padding(Dimens.spacing8),
                     )
                 }
-                RatingBadge(
-                    rating = property.rating,
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(Dimens.spacing8),
-                )
             }
-
-            Column(modifier = Modifier.padding(horizontal = Dimens.spacing16, vertical = Dimens.spacing12)) {
+            Column(modifier = Modifier.padding(Dimens.spacing12)) {
                 Text(
                     text = property.name,
                     style = MaterialTheme.typography.titleMedium,
@@ -90,6 +86,15 @@ fun PropertyCard(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(Dimens.spacing4))
+                StarRating(rating = property.rating, ratingCount = property.ratingCount)
+                Spacer(modifier = Modifier.height(Dimens.spacing8))
+                Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spacing6)) {
+                    PropertyTypeBadge(type = property.type)
+                    if (property.freeCancellationAvailable) {
+                        FreeCancellationBadge()
+                    }
+                }
+                Spacer(modifier = Modifier.height(Dimens.spacing8))
                 Text(
                     text =
                         stringResource(
@@ -98,22 +103,50 @@ fun PropertyCard(
                         ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium,
-                )
-                Spacer(modifier = Modifier.height(Dimens.spacing6))
-                Text(
-                    text =
-                        HtmlCompat
-                            .fromHtml(
-                                property.overview,
-                                HtmlCompat.FROM_HTML_MODE_COMPACT,
-                            ).toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun PropertyTypeBadge(type: String) {
+    Surface(
+        shape = MaterialTheme.shapes.extraSmall,
+        color = MaterialTheme.colorScheme.surface,
+    ) {
+        Text(
+            text = type,
+            modifier = Modifier.padding(horizontal = Dimens.spacing8, vertical = Dimens.spacing4),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun FreeCancellationBadge() {
+    Surface(
+        shape = MaterialTheme.shapes.extraSmall,
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = Dimens.spacing8, vertical = Dimens.spacing4),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.spacing4),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier.size(Dimens.spacing12),
+                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+            )
+            Text(
+                text = stringResource(R.string.badge_free_cancellation),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+            )
         }
     }
 }
