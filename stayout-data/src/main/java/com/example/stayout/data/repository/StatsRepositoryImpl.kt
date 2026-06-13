@@ -5,6 +5,7 @@ import com.example.stayout.data.remote.api.StatsApi
 import com.example.stayout.domain.repository.StatsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class StatsRepositoryImpl(
     private val api: StatsApi,
@@ -17,7 +18,8 @@ class StatsRepositoryImpl(
         scope.launch {
             try {
                 api.trackEvent(action, duration).close()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to track stats event: action=%s duration=%d", action, duration)
             }
         }
     }

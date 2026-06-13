@@ -7,6 +7,7 @@ import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.usecase.GetPropertiesUseCase
 import com.example.stayout.domain.usecase.ObserveNetworkStatusUseCase
+import com.example.stayout.domain.usecase.TrackEventUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,7 @@ class ExploreViewModelTest {
 
     private val getPropertiesUseCase: GetPropertiesUseCase = mockk()
     private val observeNetworkStatusUseCase: ObserveNetworkStatusUseCase = mockk()
+    private val trackEventUseCase: TrackEventUseCase = mockk(relaxed = true)
     private val savedStateHandle = SavedStateHandle()
 
     private val location = LocationDomainModel("Dublin", "Ireland")
@@ -67,13 +69,16 @@ class ExploreViewModelTest {
         Dispatchers.setMain(testDispatcher)
         coEvery { getPropertiesUseCase() } returns Result.success(location to properties)
         coEvery { observeNetworkStatusUseCase() } returns flowOf(true)
-        viewModel = ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
+        viewModel = createViewModel()
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
     }
+
+    private fun createViewModel() =
+        ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle, trackEventUseCase)
 
     @Test
     fun `initial load transitions to Success state with first page`() {
@@ -88,7 +93,7 @@ class ExploreViewModelTest {
     fun `load failure transitions to Error state`() {
         coEvery { getPropertiesUseCase() } returns Result.failure(RuntimeException("Network error"))
 
-        val failingVm = ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
+        val failingVm = createViewModel()
         val state = failingVm.state.value
 
         assertTrue(state is ExploreState.Error)
@@ -154,7 +159,8 @@ class ExploreViewModelTest {
             val freshDispatcher = UnconfinedTestDispatcher(testScheduler)
             Dispatchers.setMain(freshDispatcher)
 
-            val vm = ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
+            val vm =
+                ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle, trackEventUseCase)
             val before = vm.state.value as ExploreState.Success
             assertTrue(before.canLoadMore)
 
@@ -198,7 +204,7 @@ class ExploreViewModelTest {
     fun `network offline status updates isOffline in Success state`() {
         coEvery { observeNetworkStatusUseCase() } returns flowOf(false)
 
-        val offlineVm = ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle)
+        val offlineVm = createViewModel()
         val state = offlineVm.state.value as ExploreState.Success
         assertTrue(state.isOffline)
     }

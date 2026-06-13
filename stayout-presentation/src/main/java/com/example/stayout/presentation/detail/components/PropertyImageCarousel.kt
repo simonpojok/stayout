@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import coil.compose.AsyncImage
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.components.FeaturedBadge
@@ -63,6 +65,13 @@ internal fun PropertyImageCarousel(
                 horizontalArrangement = Arrangement.spacedBy(Dimens.spacing4),
             ) {
                 repeat(urls.size) { index ->
+                    val dotDescription =
+                        stringResource(
+                            R.string.cd_property_image_page_format,
+                            name,
+                            index + 1,
+                            urls.size,
+                        )
                     Box(
                         modifier =
                             Modifier
@@ -74,7 +83,9 @@ internal fun PropertyImageCarousel(
                                     } else {
                                         Color.White.copy(alpha = 0.5f)
                                     },
-                                ),
+                                ).semantics {
+                                    contentDescription = dotDescription
+                                },
                     )
                 }
             }

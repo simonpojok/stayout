@@ -4,4 +4,8 @@ import com.example.stayout.presentation.base.BaseEvent
 
 sealed interface PropertyDetailEvent : BaseEvent {
     data object NavigateBack : PropertyDetailEvent
+
+    data class ShowComingSoon(
+        val feature: String,
+    ) : PropertyDetailEvent
 }

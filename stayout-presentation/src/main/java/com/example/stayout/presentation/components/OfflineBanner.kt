@@ -19,7 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.example.stayout.presentation.R
 import com.example.stayout.presentation.theme.Dimens
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
@@ -44,7 +49,8 @@ fun OfflineBanner(
                 Modifier
                     .fillMaxWidth()
                     .background(BannerYellow)
-                    .padding(horizontal = Dimens.spacing16, vertical = Dimens.spacing8),
+                    .padding(horizontal = Dimens.spacing16, vertical = Dimens.spacing8)
+                    .semantics { liveRegion = LiveRegionMode.Polite },
         ) {
             Icon(
                 imageVector = Icons.Outlined.WifiOff,
@@ -54,7 +60,7 @@ fun OfflineBanner(
             )
             Spacer(modifier = Modifier.width(Dimens.spacing8))
             Text(
-                text = "You're offline — showing cached data",
+                text = stringResource(R.string.banner_offline_message),
                 style = MaterialTheme.typography.labelMedium,
                 color = BannerTextColor,
             )

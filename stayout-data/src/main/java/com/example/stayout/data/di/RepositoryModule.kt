@@ -1,5 +1,9 @@
 package com.example.stayout.data.di
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import com.example.stayout.data.local.dao.CommentDao
 import com.example.stayout.data.local.dao.ExchangeRatesDao
 import com.example.stayout.data.local.dao.LocationDao
@@ -21,21 +25,28 @@ import com.example.stayout.data.remote.api.PropertyApi
 import com.example.stayout.data.remote.api.RatesApi
 import com.example.stayout.data.remote.api.StatsApi
 import com.example.stayout.data.repository.CommentRepositoryImpl
+import com.example.stayout.data.repository.LoggingAnalyticsRepository
 import com.example.stayout.data.repository.NetworkStatusRepositoryImpl
 import com.example.stayout.data.repository.PropertyRepositoryImpl
 import com.example.stayout.data.repository.RatesRepositoryImpl
 import com.example.stayout.data.repository.StatsRepositoryImpl
+import com.example.stayout.data.repository.ThemeRepositoryImpl
+import com.example.stayout.domain.repository.AnalyticsRepository
 import com.example.stayout.domain.repository.CommentRepository
 import com.example.stayout.domain.repository.NetworkStatusRepository
 import com.example.stayout.domain.repository.PropertyRepository
 import com.example.stayout.domain.repository.RatesRepository
 import com.example.stayout.domain.repository.StatsRepository
+import com.example.stayout.domain.repository.ThemeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
+
+private val Context.themeDataStore: DataStore<Preferences> by preferencesDataStore(name = "theme_prefs")
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -93,7 +104,21 @@ object RepositoryModule {
 
     @Provides
     @Singleton
+    fun provideAnalyticsRepository(impl: LoggingAnalyticsRepository): AnalyticsRepository = impl
+
+    @Provides
+    @Singleton
     fun provideNetworkStatusRepository(impl: NetworkStatusRepositoryImpl): NetworkStatusRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideThemeDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<Preferences> = context.themeDataStore
+
+    @Provides
+    @Singleton
+    fun provideThemeRepository(dataStore: DataStore<Preferences>): ThemeRepository = ThemeRepositoryImpl(dataStore)
 
     @Provides
     @Singleton

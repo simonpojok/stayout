@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.components.PropertyMapView
+import com.example.stayout.presentation.components.button.OutlinedButton
 import com.example.stayout.presentation.theme.Dimens
 
 @Composable
@@ -45,13 +45,6 @@ internal fun PropertyLocationSection(
                 permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         }
-    LaunchedEffect(Unit) {
-        if (!hasLocationPermission) {
-            permissionLauncher.launch(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-            )
-        }
-    }
 
     Column(modifier = modifier) {
         Text(
@@ -59,14 +52,28 @@ internal fun PropertyLocationSection(
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(Dimens.spacing8))
-        PropertyMapView(
-            latitude = latitude,
-            longitude = longitude,
-            hasLocationPermission = hasLocationPermission,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(Dimens.spacing200),
-        )
+        if (hasLocationPermission) {
+            PropertyMapView(
+                latitude = latitude,
+                longitude = longitude,
+                hasLocationPermission = true,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(Dimens.spacing200),
+            )
+        } else {
+            OutlinedButton(
+                label = stringResource(R.string.btn_show_on_map),
+                onClick = {
+                    permissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                        ),
+                    )
+                },
+            )
+        }
     }
 }

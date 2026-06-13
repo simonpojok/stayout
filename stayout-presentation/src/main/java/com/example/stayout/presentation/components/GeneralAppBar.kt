@@ -17,8 +17,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -47,10 +48,11 @@ import com.example.stayout.presentation.theme.StayScoutTheme
 fun GeneralAppBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
     onAvatarClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
-    onCallClick: () -> Unit = {},
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -165,7 +167,7 @@ fun GeneralAppBar(
             }
 
             FilledIconButton(
-                onClick = onCallClick,
+                onClick = onToggleTheme,
                 shape = RoundedCornerShape(4.dp),
                 colors =
                     IconButtonDefaults.filledIconButtonColors(
@@ -174,8 +176,11 @@ fun GeneralAppBar(
                     ),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Phone,
-                    contentDescription = stringResource(R.string.cd_call),
+                    imageVector = if (isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                    contentDescription =
+                        stringResource(
+                            if (isDarkTheme) R.string.cd_switch_to_light_mode else R.string.cd_switch_to_dark_mode,
+                        ),
                 )
             }
         }
@@ -194,6 +199,8 @@ internal fun GeneralAppBarEmptyPreview() {
         GeneralAppBar(
             searchQuery = "",
             onSearchQueryChange = {},
+            isDarkTheme = false,
+            onToggleTheme = {},
         )
     }
 }
@@ -206,6 +213,8 @@ internal fun GeneralAppBarActivePreview() {
         GeneralAppBar(
             searchQuery = "Amsterdam",
             onSearchQueryChange = {},
+            isDarkTheme = true,
+            onToggleTheme = {},
         )
     }
 }

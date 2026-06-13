@@ -2,8 +2,10 @@ package com.example.stayout.presentation.home.sections.explore
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.example.stayout.domain.model.AnalyticsEvent
 import com.example.stayout.domain.usecase.GetPropertiesUseCase
 import com.example.stayout.domain.usecase.ObserveNetworkStatusUseCase
+import com.example.stayout.domain.usecase.TrackEventUseCase
 import com.example.stayout.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -19,6 +21,7 @@ class ExploreViewModel
         private val getPropertiesUseCase: GetPropertiesUseCase,
         private val observeNetworkStatusUseCase: ObserveNetworkStatusUseCase,
         private val savedStateHandle: SavedStateHandle,
+        private val trackEventUseCase: TrackEventUseCase,
     ) : BaseViewModel<ExploreState, ExploreIntent, ExploreEvent>(
             initialState = ExploreState.Loading,
         ) {
@@ -28,6 +31,7 @@ class ExploreViewModel
         init {
             onIntent(ExploreIntent.Load)
             observeNetworkStatus()
+            track(AnalyticsEvent.ScreenViewed("explore"))
         }
 
         override fun onIntent(intent: ExploreIntent) {
@@ -38,12 +42,19 @@ class ExploreViewModel
                     val current = currentState as? ExploreState.Success ?: return
                     if (current.canLoadMore && !current.isLoadingMore) loadMore()
                 }
-                is ExploreIntent.SelectProperty ->
+                is ExploreIntent.SelectProperty -> {
+                    track(AnalyticsEvent.PropertyTapped(intent.property.id))
                     emitEvent(ExploreEvent.NavigateToDetail(intent.property.id))
-                is ExploreIntent.UpdateSearch ->
+                }
+                is ExploreIntent.UpdateSearch -> {
                     updateState {
                         (this as? ExploreState.Success)?.copy(searchQuery = intent.query) ?: this
                     }
+                    val success = currentState as? ExploreState.Success ?: return
+                    if (intent.query.isNotBlank()) {
+                        track(AnalyticsEvent.SearchPerformed(intent.query, success.displayedProperties.size))
+                    }
+                }
             }
         }
 
@@ -117,6 +128,10 @@ class ExploreViewModel
                     } ?: this
                 }
             }
+        }
+
+        private fun track(event: AnalyticsEvent) {
+            viewModelScope.launch { trackEventUseCase(event) }
         }
 
         companion object {

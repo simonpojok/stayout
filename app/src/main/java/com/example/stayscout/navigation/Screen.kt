@@ -1,13 +1,14 @@
 package com.example.stayscout.navigation
 
-sealed class Screen(
-    val route: String,
-) {
-    data object List : Screen("list")
+import kotlinx.serialization.Serializable
 
-    data object Detail : Screen("detail/{propertyId}") {
-        const val ARG_PROPERTY_ID = "propertyId"
+@Serializable
+sealed class Screen {
+    @Serializable
+    data object List : Screen()
 
-        fun createRoute(propertyId: Int) = "detail/$propertyId"
-    }
+    @Serializable
+    data class Detail(
+        val propertyId: Int,
+    ) : Screen()
 }

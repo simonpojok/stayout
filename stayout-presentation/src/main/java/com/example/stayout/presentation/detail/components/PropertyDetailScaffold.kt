@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.stayout.presentation.components.BasicAppBar
@@ -24,6 +26,7 @@ internal fun PropertyDetailScaffold(
     state: PropertyDetailState,
     onBack: () -> Unit,
     onIntent: (PropertyDetailIntent) -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
     val propertyName = (state as? PropertyDetailState.Success)?.property?.name ?: ""
 
@@ -35,6 +38,7 @@ internal fun PropertyDetailScaffold(
         bottomBar = {
             BottomActionBar(onIntent = onIntent, applyNavigationBarPadding = true)
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             OfflineBanner(visible = (state as? PropertyDetailState.Success)?.isOffline == true)
@@ -58,7 +62,12 @@ internal fun PropertyDetailScaffold(
 @Composable
 private fun PropertyDetailSkeletonPreview() {
     StayScoutTheme {
-        PropertyDetailScaffold(state = PropertyDetailState.Loading, onBack = {}, onIntent = {})
+        PropertyDetailScaffold(
+            state = PropertyDetailState.Loading,
+            onBack = {},
+            onIntent = {},
+            snackbarHostState = SnackbarHostState(),
+        )
     }
 }
 
@@ -70,6 +79,7 @@ private fun PropertyDetailErrorPreview() {
             state = PropertyDetailState.Error("Property not found"),
             onBack = {},
             onIntent = {},
+            snackbarHostState = SnackbarHostState(),
         )
     }
 }
@@ -82,6 +92,7 @@ private fun PropertyDetailSuccessPreview() {
             state = PropertyDetailState.Success(property = previewProperty, rates = previewRates),
             onBack = {},
             onIntent = {},
+            snackbarHostState = SnackbarHostState(),
         )
     }
 }
@@ -99,6 +110,7 @@ private fun PropertyDetailRatesUnavailablePreview() {
                 ),
             onBack = {},
             onIntent = {},
+            snackbarHostState = SnackbarHostState(),
         )
     }
 }
