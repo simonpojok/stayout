@@ -7,6 +7,7 @@ import com.example.stayout.data.remote.model.OverallRatingDataModel
 import com.example.stayout.data.remote.model.PriceDataModel
 import com.example.stayout.data.remote.model.PropertyDataModel
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
+import com.example.stayout.domain.model.FacilityDomainModel
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -18,7 +19,9 @@ import java.math.BigDecimal
 
 class PropertyToDomainMapperTest {
     private val facilityCategoryMapper = mockk<FacilityCategoryToDomainMapper>()
-    private val mapper = PropertyToDomainMapper(facilityCategoryMapper)
+    private val ratingBreakdownMapper = mockk<RatingBreakdownToDomainMapper>()
+    private val promotionMapper = mockk<PromotionToDomainMapper>()
+    private val mapper = PropertyToDomainMapper(facilityCategoryMapper, ratingBreakdownMapper, promotionMapper)
 
     @Test
     fun `maps id and name correctly`() {
@@ -112,9 +115,14 @@ class PropertyToDomainMapperTest {
             FacilityCategoryDataModel(
                 name = "Services",
                 id = "s1",
-                facilities = listOf(FacilityDataModel("Free WiFi", "w1")),
+                facilities = listOf(FacilityDataModel("Free WiFi", "FREEWIFI")),
             )
-        val domainCategory = FacilityCategoryDomainModel("Services", listOf("Free WiFi"))
+        val domainCategory =
+            FacilityCategoryDomainModel(
+                id = "s1",
+                name = "Services",
+                facilities = listOf(FacilityDomainModel(id = "FREEWIFI", name = "Free WiFi")),
+            )
         every { facilityCategoryMapper.map(dataCategory) } returns domainCategory
 
         val result = mapper.map(buildProperty(facilities = listOf(dataCategory)))

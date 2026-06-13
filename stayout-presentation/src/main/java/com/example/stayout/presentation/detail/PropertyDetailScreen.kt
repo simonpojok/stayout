@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.stayout.presentation.detail.components.PropertyDetailContent
+import com.example.stayout.presentation.detail.components.PropertyDetailScaffold
 
 @Composable
 fun PropertyDetailScreen(
@@ -20,7 +20,7 @@ fun PropertyDetailScreen(
         viewModel.events.collect { event -> currentOnEvent(event) }
     }
 
-    PropertyDetailContent(
+    PropertyDetailScaffold(
         state = state,
         onBack = { onEvent(PropertyDetailEvent.NavigateBack) },
         onIntent = viewModel::onIntent,

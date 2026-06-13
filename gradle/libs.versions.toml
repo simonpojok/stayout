@@ -15,7 +15,7 @@ kotlinxSerialization = "1.7.3"
 hilt = "2.59.2"
 hiltNavigationCompose = "1.2.0"
 coil = "2.7.0"
-chucker = "4.0.0"
+chucker = "4.1.0"
 navigationCompose = "2.8.5"
 lifecycleViewmodelCompose = "2.8.0"
 mockk = "1.13.12"
@@ -35,6 +35,7 @@ detekt = "2.0.0-alpha.3"
 composeRules = "0.6.0"
 kover = "0.9.8"
 osmdroid = "6.1.18"
+showkase = "1.0.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -87,6 +88,9 @@ osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "o
 rxjava3 = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava3" }
 retrofit-adapter-rxjava3 = { group = "com.squareup.retrofit2", name = "adapter-rxjava3", version.ref = "retrofit" }
 kotlinx-coroutines-rx3 = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-rx3", version.ref = "kotlinxCoroutines" }
+showkase-browser = { module = "com.airbnb.android:showkase", version.ref = "showkase" }
+showkase-annotation = { module = "com.airbnb.android:showkase-annotation", version.ref = "showkase" }
+showkase-processor = { module = "com.airbnb.android:showkase-processor", version.ref = "showkase" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

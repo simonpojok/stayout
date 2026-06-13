@@ -2,6 +2,7 @@ package com.example.stayout.presentation.home.sections.explore
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
+import com.example.stayout.domain.model.FacilityDomainModel
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.usecase.GetPropertiesUseCase
@@ -48,7 +49,13 @@ class ExploreViewModelTest {
                 thumbnailUrl = null,
                 address = "Address $id",
                 type = "Hostel",
-                facilities = listOf(FacilityCategoryDomainModel("Amenities", listOf("WiFi"))),
+                facilities =
+                    listOf(
+                        FacilityCategoryDomainModel(
+                            name = "Amenities",
+                            facilities = listOf(FacilityDomainModel(id = "WIFI", name = "WiFi")),
+                        ),
+                    ),
                 freeCancellationAvailable = false,
             )
         }

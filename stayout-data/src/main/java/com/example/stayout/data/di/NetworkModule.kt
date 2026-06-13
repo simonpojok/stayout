@@ -3,6 +3,7 @@ package com.example.stayout.data.di
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.chuckerteam.chucker.api.RetentionManager
 import com.example.stayout.data.remote.api.CommentApi
 import com.example.stayout.data.remote.api.PropertyApi
 import com.example.stayout.data.remote.api.RatesApi
@@ -48,9 +49,10 @@ object NetworkModule {
     ): ChuckerInterceptor =
         ChuckerInterceptor
             .Builder(context)
-            .collector(ChuckerCollector(context, showNotification = true))
-            .maxContentLength(250_000L)
-            .alwaysReadResponseBody(false)
+            .collector(
+                ChuckerCollector(context, showNotification = true, retentionPeriod = RetentionManager.Period.ONE_HOUR),
+            ).maxContentLength(250_000L)
+            .alwaysReadResponseBody(true)
             .build()
 
     @Provides

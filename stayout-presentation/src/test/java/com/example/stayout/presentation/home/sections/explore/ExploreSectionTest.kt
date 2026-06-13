@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
+import com.example.stayout.domain.model.FacilityDomainModel
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.presentation.theme.StayScoutTheme
@@ -37,7 +38,13 @@ class ExploreSectionTest {
             thumbnailUrl = null,
             address = "2-12 Lord Edward St",
             type = "Hostel",
-            facilities = listOf(FacilityCategoryDomainModel("Amenities", listOf("WiFi"))),
+            facilities =
+                listOf(
+                    FacilityCategoryDomainModel(
+                        name = "Amenities",
+                        facilities = listOf(FacilityDomainModel(id = "WIFI", name = "WiFi")),
+                    ),
+                ),
             freeCancellationAvailable = true,
         )
 

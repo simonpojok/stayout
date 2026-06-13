@@ -2,4 +2,7 @@
 <resources>
 
     <style name="Theme.StayScout" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Applied to third-party debug/QA activities. On API 35+ opts out of forced edge-to-edge (see values-v35). -->
+    <style name="Theme.StayScout.Debug" parent="Theme.MaterialComponents.Light.NoActionBar" />
 </resources>

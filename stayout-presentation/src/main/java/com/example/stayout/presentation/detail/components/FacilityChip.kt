@@ -18,15 +18,16 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import com.example.stayout.domain.model.FacilityDomainModel
 import com.example.stayout.presentation.theme.Dimens
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
-import com.example.stayout.presentation.util.facilityIconFor
+import com.example.stayout.presentation.util.facilityIconForId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FacilityChip(
-    name: String,
+    facility: FacilityDomainModel,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -36,7 +37,7 @@ internal fun FacilityChip(
         modifier =
             Modifier
                 .size(Dimens.spacing80)
-                .semantics { contentDescription = name },
+                .semantics { contentDescription = facility.name },
     ) {
         Column(
             modifier = Modifier.padding(Dimens.spacing12),
@@ -44,14 +45,14 @@ internal fun FacilityChip(
             verticalArrangement = Arrangement.Center,
         ) {
             Icon(
-                imageVector = facilityIconFor(name),
+                imageVector = facilityIconForId(facility.id),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(Dimens.spacing24),
             )
             Spacer(modifier = Modifier.height(Dimens.spacing4))
             Text(
-                text = name,
+                text = facility.name,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -66,7 +67,7 @@ internal fun FacilityChip(
 @Composable
 private fun FacilityChipWifiPreview() {
     StayScoutTheme {
-        FacilityChip(name = "Free WiFi", onClick = {})
+        FacilityChip(facility = FacilityDomainModel(id = "FREEWIFI", name = "Free WiFi"), onClick = {})
     }
 }
 
@@ -74,6 +75,6 @@ private fun FacilityChipWifiPreview() {
 @Composable
 private fun FacilityChipLockerPreview() {
     StayScoutTheme {
-        FacilityChip(name = "Lockers", onClick = {})
+        FacilityChip(facility = FacilityDomainModel(id = "LOCKERS", name = "Lockers"), onClick = {})
     }
 }

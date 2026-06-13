@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.theme.Dimens
 import com.example.stayout.presentation.theme.PreviewThemes
@@ -185,9 +186,10 @@ fun GeneralAppBar(
 
 // region Previews
 
+@ShowkaseComposable(name = "App Bar – Empty", group = "App Bar")
 @PreviewThemes
 @Composable
-private fun GeneralAppBarEmptyPreview() {
+internal fun GeneralAppBarEmptyPreview() {
     StayScoutTheme {
         GeneralAppBar(
             searchQuery = "",
@@ -196,9 +198,10 @@ private fun GeneralAppBarEmptyPreview() {
     }
 }
 
+@ShowkaseComposable(name = "App Bar – Active Search", group = "App Bar")
 @PreviewThemes
 @Composable
-private fun GeneralAppBarActivePreview() {
+internal fun GeneralAppBarActivePreview() {
     StayScoutTheme {
         GeneralAppBar(
             searchQuery = "Amsterdam",

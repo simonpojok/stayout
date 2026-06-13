@@ -65,6 +65,7 @@ android {
             buildConfigField("String", "JSON_PLACEHOLDER_BASE_URL", "\"${props["JSON_PLACEHOLDER_BASE_URL"]}\"")
             resValue("string", "app_name", "StayScout QA")
             signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("debug", "release")
         }
 
         release {
@@ -123,6 +124,10 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     ksp(libs.hilt.compiler)
+    debugImplementation(libs.showkase.browser)
+    kspDebug(libs.showkase.processor)
+    "qaImplementation"(libs.showkase.browser)
+    "kspQa"(libs.showkase.processor)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

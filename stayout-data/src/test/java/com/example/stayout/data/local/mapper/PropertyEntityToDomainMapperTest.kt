@@ -3,6 +3,7 @@ package com.example.stayout.data.local.mapper
 import com.example.stayout.data.local.converter.encodeFacilities
 import com.example.stayout.data.local.entity.PropertyEntity
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
+import com.example.stayout.domain.model.FacilityDomainModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -15,7 +16,15 @@ class PropertyEntityToDomainMapperTest {
 
     private val facilities =
         listOf(
-            FacilityCategoryDomainModel("Amenities", listOf("WiFi", "Parking")),
+            FacilityCategoryDomainModel(
+                id = "AMENITIES",
+                name = "Amenities",
+                facilities =
+                    listOf(
+                        FacilityDomainModel(id = "WIFI", name = "WiFi"),
+                        FacilityDomainModel(id = "PARKING", name = "Parking"),
+                    ),
+            ),
         )
 
     private val entity =
@@ -59,12 +68,15 @@ class PropertyEntityToDomainMapperTest {
     }
 
     @Test
-    fun `map decodes facilitiesJson to domain list`() {
+    fun `map decodes facilitiesJson to domain list with id and name`() {
         val domain = mapper.map(entity)
 
         assertEquals(1, domain.facilities.size)
+        assertEquals("AMENITIES", domain.facilities[0].id)
         assertEquals("Amenities", domain.facilities[0].name)
-        assertEquals(listOf("WiFi", "Parking"), domain.facilities[0].facilities)
+        assertEquals(2, domain.facilities[0].facilities.size)
+        assertEquals(FacilityDomainModel(id = "WIFI", name = "WiFi"), domain.facilities[0].facilities[0])
+        assertEquals(FacilityDomainModel(id = "PARKING", name = "Parking"), domain.facilities[0].facilities[1])
     }
 
     @Test

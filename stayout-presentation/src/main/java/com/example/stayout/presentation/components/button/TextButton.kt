@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.example.stayout.presentation.theme.Dimens
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
@@ -50,9 +51,10 @@ fun TextButton(
     buttonContent = ButtonContent.Custom(content),
 )
 
+@ShowkaseComposable(name = "Text Button", group = "Buttons")
 @PreviewThemes
 @Composable
-private fun TextButtonPreview() {
+internal fun TextButtonPreview() {
     StayScoutTheme {
         Column(
             modifier = Modifier.padding(Dimens.spacing16),

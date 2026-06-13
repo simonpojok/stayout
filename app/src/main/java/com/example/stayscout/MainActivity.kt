@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.example.stayout.presentation.theme.StayScoutTheme
+import com.example.stayscout.debug.DebugNotificationHelper
 import com.example.stayscout.navigation.AppNavGraph
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -19,5 +20,6 @@ class MainActivity : ComponentActivity() {
                 AppNavGraph()
             }
         }
+        DebugNotificationHelper.show(this)
     }
 }
