@@ -83,6 +83,14 @@ is_excluded() {
     [[ "$name" == "NativeKeys"               ]] && return 0
     # Android Keystore provider unavailable in JVM unit tests
     [[ "$name" == "KeystorePassphraseCipher" ]] && return 0
+    # Debug-only framework code — depends on Android runtime, not testable in JVM unit tests
+    [[ "$name" == "DebugActivityFixer"       ]] && return 0
+    [[ "$name" == "DebugNotificationHelper"  ]] && return 0
+    [[ "$name" == "ShowCaseRoot"             ]] && return 0
+    [[ "$name" == "ShowkaseLauncher"         ]] && return 0
+    [[ "$name" == "HttpTransaction"          ]] && return 0
+    # Pure @Serializable data models — no executable business logic beyond generated equals/copy
+    [[ "$name" == *DataModel                 ]] && return 0
     return 1
 }
 
