@@ -178,4 +178,37 @@ class PropertyRepositoryImplTest {
 
             verify(exactly = 0) { statsRepository.trackEvent(any(), any()) }
         }
+
+    @Test
+    fun `getPropertyById returns the property matching the given id`() =
+        runTest {
+            coEvery { api.getProperties() } returns stubResponse
+            every { mapper.map(stubResponse) } returns stubResult
+
+            val result = repository.getPropertyById(1)
+
+            assertEquals(stubProperty, result)
+        }
+
+    @Test
+    fun `getPropertyById returns null when no property matches`() =
+        runTest {
+            coEvery { api.getProperties() } returns stubResponse
+            every { mapper.map(stubResponse) } returns stubResult
+
+            val result = repository.getPropertyById(99)
+
+            org.junit.Assert.assertNull(result)
+        }
+
+    @Test
+    fun `getPropertyById tracks LOAD_DETAILS stats event`() =
+        runTest {
+            coEvery { api.getProperties() } returns stubResponse
+            every { mapper.map(stubResponse) } returns stubResult
+
+            repository.getPropertyById(1)
+
+            verify { statsRepository.trackEvent(StatsEvent.LOAD_DETAILS, any()) }
+        }
 }

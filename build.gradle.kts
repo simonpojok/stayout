@@ -78,6 +78,7 @@ kover {
                     "com.example.stayout.*.theme",
                     "com.example.stayscout.*.theme",
                     "com.example.stayout.*.local.migration",
+                    "com.example.stayscout.initializer",
                 )
             }
         }

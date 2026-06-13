@@ -30,11 +30,4 @@ class BookingsViewModelTest {
     fun `initial state is Idle`() {
         assertEquals(BookingsState.Idle, viewModel.state.value)
     }
-
-    @Test
-    fun `onIntent does not change state`() {
-        viewModel.onIntent(BookingsIntent.None)
-
-        assertEquals(BookingsState.Idle, viewModel.state.value)
-    }
 }

@@ -5,4 +5,6 @@ import com.example.stayout.domain.model.PropertyDomainModel
 
 interface PropertyRepository {
     suspend fun getProperties(): Result<Pair<LocationDomainModel, List<PropertyDomainModel>>>
+
+    suspend fun getPropertyById(id: Int): PropertyDomainModel?
 }

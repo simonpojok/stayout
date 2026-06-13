@@ -38,6 +38,13 @@ class PropertyRepositoryImpl(
         }
     }
 
+    override suspend fun getPropertyById(id: Int): PropertyDomainModel? {
+        val start = System.currentTimeMillis()
+        val property = getProperties().getOrNull()?.second?.find { it.id == id }
+        statsRepository.trackEvent(StatsEvent.LOAD_DETAILS, System.currentTimeMillis() - start)
+        return property
+    }
+
     private suspend fun persist(result: Pair<LocationDomainModel, List<PropertyDomainModel>>) {
         locationDao.insert(locationDomainToEntity.map(result.first))
         propertyDao.deleteAll()

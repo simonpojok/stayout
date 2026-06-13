@@ -30,11 +30,4 @@ class ProfileViewModelTest {
     fun `initial state is Idle`() {
         assertEquals(ProfileState.Idle, viewModel.state.value)
     }
-
-    @Test
-    fun `onIntent does not change state`() {
-        viewModel.onIntent(ProfileIntent.None)
-
-        assertEquals(ProfileState.Idle, viewModel.state.value)
-    }
 }

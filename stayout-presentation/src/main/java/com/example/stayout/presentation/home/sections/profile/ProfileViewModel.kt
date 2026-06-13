@@ -1,6 +1,6 @@
 package com.example.stayout.presentation.home.sections.profile
 
-import com.example.stayout.presentation.base.BaseViewModel
+import com.example.stayout.presentation.base.BaseNoIntentViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -8,8 +8,4 @@ import javax.inject.Inject
 class ProfileViewModel
     @Inject
     constructor() :
-    BaseViewModel<ProfileState, ProfileIntent, ProfileEvent>(
-            initialState = ProfileState.Idle,
-        ) {
-        override fun onIntent(intent: ProfileIntent) = Unit
-    }
+    BaseNoIntentViewModel<ProfileState, ProfileEvent>(initialState = ProfileState.Idle)

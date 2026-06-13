@@ -9,16 +9,7 @@ class LoggingAnalyticsRepository
     @Inject
     constructor() : AnalyticsRepository {
         override fun track(event: AnalyticsEvent) {
-            when (event) {
-                is AnalyticsEvent.ScreenViewed ->
-                    Timber.tag(TAG).d("screen_view: screen=%s", event.screen)
-                is AnalyticsEvent.PropertyTapped ->
-                    Timber.tag(TAG).d("property_tap: id=%d", event.propertyId)
-                is AnalyticsEvent.CurrencyChanged ->
-                    Timber.tag(TAG).d("currency_change: from=%s to=%s", event.from, event.to)
-                is AnalyticsEvent.SearchPerformed ->
-                    Timber.tag(TAG).d("search: query=%s results=%d", event.query, event.resultCount)
-            }
+            Timber.tag(TAG).d(event.toLogString())
         }
 
         companion object {

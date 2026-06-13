@@ -61,3 +61,18 @@ abstract class BaseViewModel<State : BaseState, Intent : BaseIntent, Event : Bas
         viewModelScope.launch { _events.send(event) }
     }
 }
+
+/**
+ * Base ViewModel for screens that observe state and emit events but accept no user intents.
+ *
+ * Uses [Nothing] as the Intent type parameter — the bottom type in Kotlin's type system.
+ * [onIntent] can never be called because no value of type [Nothing] can be constructed,
+ * so subclasses are not required to provide a meaningful implementation.
+ *
+ * Use this for placeholder or display-only screens (e.g. Saved, Bookings, Profile stubs).
+ */
+abstract class BaseNoIntentViewModel<State : BaseState, Event : BaseEvent>(
+    initialState: State,
+) : BaseViewModel<State, Nothing, Event>(initialState) {
+    final override fun onIntent(intent: Nothing) = Unit
+}
