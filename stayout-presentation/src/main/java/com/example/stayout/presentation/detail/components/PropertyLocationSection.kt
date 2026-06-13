@@ -28,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.core.content.ContextCompat
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.components.PropertyMapView
@@ -81,6 +83,7 @@ internal fun PropertyLocationSection(
         Text(
             text = stringResource(R.string.label_location_map),
             style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() },
         )
         Spacer(modifier = Modifier.height(Dimens.spacing8))
         if (rationaleVisible && !hasLocationPermission) {

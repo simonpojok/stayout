@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.core.text.HtmlCompat
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.theme.Dimens
@@ -23,6 +25,7 @@ internal fun PropertyOverviewSection(
         Text(
             text = stringResource(R.string.label_about),
             style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() },
         )
         Spacer(modifier = Modifier.height(Dimens.spacing8))
         Text(

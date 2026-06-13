@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import com.example.stayout.domain.model.RatingBreakdownDomainModel
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.preview.PreviewData
@@ -38,6 +40,7 @@ internal fun RatingBreakdownSection(
         Text(
             text = stringResource(R.string.label_rating_breakdown),
             style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() },
         )
         if (breakdown.ratingsCount > 0) {
             Text(
