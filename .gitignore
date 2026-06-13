@@ -2,6 +2,7 @@
 .gradle
 /local.properties
 config/keystore.properties
+config/*.jks
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
