@@ -8,6 +8,6 @@ class FacilityCategoryToPresentationMapper :
     override fun map(model: FacilityCategoryDomainModel): FacilityCategoryUiModel =
         FacilityCategoryUiModel(
             name = model.name,
-            facilities = model.facilities,
+            facilities = model.facilities.map { it.name },
         )
 }

@@ -99,4 +99,35 @@ class PropertyDomainModelTest {
         val model = ExchangeRatesDomainModel(usd = BigDecimal("1.1"), gbp = BigDecimal("0.9"))
         assertEquals(BigDecimal.ONE, model.eur)
     }
+
+    @Test
+    fun `formatIn EUR returns value with EUR symbol unchanged`() {
+        val result = BigDecimal("12.50").formatIn(CurrencyDomainModel.EUR, rates)
+        assertEquals("€12.50", result)
+    }
+
+    @Test
+    fun `formatIn USD multiplies by usd rate`() {
+        val result = BigDecimal("10.00").formatIn(CurrencyDomainModel.USD, rates)
+        assertEquals("\$10.80", result)
+    }
+
+    @Test
+    fun `formatIn GBP multiplies by gbp rate`() {
+        val result = BigDecimal("10.00").formatIn(CurrencyDomainModel.GBP, rates)
+        assertEquals("£8.60", result)
+    }
+
+    @Test
+    fun `formatIn rounds HALF_UP to 2 decimal places`() {
+        val result = BigDecimal("10.005").formatIn(CurrencyDomainModel.EUR, rates)
+        assertEquals("€10.01", result)
+    }
+
+    @Test
+    fun `formatIn zero value returns zero formatted`() {
+        assertEquals("€0.00", BigDecimal.ZERO.formatIn(CurrencyDomainModel.EUR, rates))
+        assertEquals("\$0.00", BigDecimal.ZERO.formatIn(CurrencyDomainModel.USD, rates))
+        assertEquals("£0.00", BigDecimal.ZERO.formatIn(CurrencyDomainModel.GBP, rates))
+    }
 }

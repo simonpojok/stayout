@@ -1,6 +1,12 @@
 package com.example.stayout.domain.model
 
-data class FacilityCategoryDomainModel(
+data class FacilityDomainModel(
+    val id: String,
     val name: String,
-    val facilities: List<String>,
+)
+
+data class FacilityCategoryDomainModel(
+    val id: String = "",
+    val name: String,
+    val facilities: List<FacilityDomainModel>,
 )

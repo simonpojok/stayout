@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.example.stayout.domain.model.CurrencyDomainModel
 import com.example.stayout.domain.model.ExchangeRatesDomainModel
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
+import com.example.stayout.domain.model.FacilityDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.usecase.GetExchangeRatesUseCase
 import com.example.stayout.domain.usecase.GetPropertyByIdUseCase
@@ -51,8 +52,16 @@ class PropertyDetailViewModelTest {
             thumbnailUrl = "https://example.com/thumb.jpg",
             address = "2-12 Lord Edward St",
             type = "Hostel",
-            facilities = listOf(FacilityCategoryDomainModel("Amenities", listOf("WiFi"))),
+            facilities =
+                listOf(
+                    FacilityCategoryDomainModel(
+                        name = "Amenities",
+                        facilities = listOf(FacilityDomainModel(id = "WIFI", name = "WiFi")),
+                    ),
+                ),
             freeCancellationAvailable = true,
+            latitude = 53.3437259,
+            longitude = -6.269898,
         )
 
     private val rates =
@@ -91,6 +100,8 @@ class PropertyDetailViewModelTest {
         assertEquals(rates, state.rates)
         assertFalse(state.ratesUnavailable)
         assertEquals(CurrencyDomainModel.EUR, state.selectedCurrency)
+        assertEquals(property.latitude, state.property.latitude, 0.0)
+        assertEquals(property.longitude, state.property.longitude, 0.0)
     }
 
     @Test

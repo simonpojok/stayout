@@ -1,14 +1,13 @@
 package com.example.stayout.data.di
 
-import com.example.stayout.data.mapper.AddressToDomainMapper
-import com.example.stayout.data.mapper.CommentToDomainMapper
-import com.example.stayout.data.mapper.CompanyToDomainMapper
 import com.example.stayout.data.mapper.ExchangeRatesToDomainMapper
 import com.example.stayout.data.mapper.FacilityCategoryToDomainMapper
+import com.example.stayout.data.mapper.FacilityToDomainMapper
 import com.example.stayout.data.mapper.LocationToDomainMapper
+import com.example.stayout.data.mapper.PromotionToDomainMapper
 import com.example.stayout.data.mapper.PropertiesResponseToDomainMapper
 import com.example.stayout.data.mapper.PropertyToDomainMapper
-import com.example.stayout.data.mapper.UserToDomainMapper
+import com.example.stayout.data.mapper.RatingBreakdownToDomainMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,7 +19,12 @@ import javax.inject.Singleton
 object RemoteMapperModule {
     @Provides
     @Singleton
-    fun provideFacilityCategoryToDomainMapper(): FacilityCategoryToDomainMapper = FacilityCategoryToDomainMapper()
+    fun provideFacilityToDomainMapper(): FacilityToDomainMapper = FacilityToDomainMapper()
+
+    @Provides
+    @Singleton
+    fun provideFacilityCategoryToDomainMapper(facilityMapper: FacilityToDomainMapper): FacilityCategoryToDomainMapper =
+        FacilityCategoryToDomainMapper(facilityMapper)
 
     @Provides
     @Singleton
@@ -28,8 +32,19 @@ object RemoteMapperModule {
 
     @Provides
     @Singleton
-    fun providePropertyToDomainMapper(facilityCategoryMapper: FacilityCategoryToDomainMapper): PropertyToDomainMapper =
-        PropertyToDomainMapper(facilityCategoryMapper)
+    fun provideRatingBreakdownToDomainMapper(): RatingBreakdownToDomainMapper = RatingBreakdownToDomainMapper()
+
+    @Provides
+    @Singleton
+    fun providePromotionToDomainMapper(): PromotionToDomainMapper = PromotionToDomainMapper()
+
+    @Provides
+    @Singleton
+    fun providePropertyToDomainMapper(
+        facilityCategoryMapper: FacilityCategoryToDomainMapper,
+        ratingBreakdownMapper: RatingBreakdownToDomainMapper,
+        promotionMapper: PromotionToDomainMapper,
+    ): PropertyToDomainMapper = PropertyToDomainMapper(facilityCategoryMapper, ratingBreakdownMapper, promotionMapper)
 
     @Provides
     @Singleton
@@ -41,24 +56,4 @@ object RemoteMapperModule {
     @Provides
     @Singleton
     fun provideExchangeRatesToDomainMapper(): ExchangeRatesToDomainMapper = ExchangeRatesToDomainMapper()
-
-    @Provides
-    @Singleton
-    fun provideAddressToDomainMapper(): AddressToDomainMapper = AddressToDomainMapper()
-
-    @Provides
-    @Singleton
-    fun provideCompanyToDomainMapper(): CompanyToDomainMapper = CompanyToDomainMapper()
-
-    @Provides
-    @Singleton
-    fun provideUserToDomainMapper(
-        addressMapper: AddressToDomainMapper,
-        companyMapper: CompanyToDomainMapper,
-    ): UserToDomainMapper = UserToDomainMapper(addressMapper, companyMapper)
-
-    @Provides
-    @Singleton
-    fun provideCommentToDomainMapper(userMapper: UserToDomainMapper): CommentToDomainMapper =
-        CommentToDomainMapper(userMapper)
 }

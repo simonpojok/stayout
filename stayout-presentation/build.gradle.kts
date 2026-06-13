@@ -53,6 +53,10 @@ android {
     }
 }
 
+ksp {
+    arg("skipPrivatePreviews", "true")
+}
+
 dependencies {
     implementation(project(":stayout-domain"))
     implementation(libs.androidx.core.ktx)
@@ -72,6 +76,11 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.osmdroid)
     implementation(libs.kotlinx.coroutines.rx3)
+    implementation(libs.showkase.annotation)
+    debugImplementation(libs.showkase.browser)
+    "qaImplementation"(libs.showkase.browser)
+    kspDebug(libs.showkase.processor)
+    "kspQa"(libs.showkase.processor)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

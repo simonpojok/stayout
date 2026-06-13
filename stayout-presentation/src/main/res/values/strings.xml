@@ -83,4 +83,39 @@
     <string name="label_facilities">Facilities</string>
     <string name="cd_hero_image_format">%1$s hero image</string>
     <string name="cd_back">Back</string>
+
+    <!-- Detail screen — image carousel -->
+    <string name="cd_property_image_page_format">%1$s image %2$d of %3$d</string>
+
+    <!-- Detail screen — property badges -->
+    <string name="badge_new">New</string>
+    <string name="badge_popular">Very Popular</string>
+
+    <!-- Detail screen — distance -->
+    <string name="label_distance_from_centre">%.2f km from centre</string>
+
+    <!-- Detail screen — price breakdown -->
+    <string name="label_dorm_price_format">Dorm from %1$s</string>
+    <string name="label_private_price_format">Private from %1$s</string>
+
+    <!-- Detail screen — new enrichment labels -->
+    <string name="label_hw_recommends">HW Recommends</string>
+    <string name="label_neighbourhood">Neighbourhood</string>
+    <string name="label_minimum_stay">Minimum Stay Notice</string>
+    <string name="label_active_deals">Active Deals</string>
+    <string name="label_free_cancellation_until">Free cancellation until %1$s</string>
+    <string name="label_save_amount">Save %1$s</string>
+    <string name="label_original_price">Was %1$s</string>
+    <string name="label_based_on_reviews">Based on %1$d reviews</string>
+    <string name="label_star_rating_format">%1$d-star property</string>
+
+    <!-- Detail screen — rating breakdown -->
+    <string name="label_rating_breakdown">Rating Breakdown</string>
+    <string name="label_rating_security">Security</string>
+    <string name="label_rating_location">Location</string>
+    <string name="label_rating_staff">Staff</string>
+    <string name="label_rating_fun">Fun</string>
+    <string name="label_rating_cleanliness">Cleanliness</string>
+    <string name="label_rating_facilities">Facilities</string>
+    <string name="label_rating_value">Value</string>
 </resources>

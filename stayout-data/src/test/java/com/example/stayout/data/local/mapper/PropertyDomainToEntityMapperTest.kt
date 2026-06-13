@@ -1,6 +1,7 @@
 package com.example.stayout.data.local.mapper
 
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
+import com.example.stayout.domain.model.FacilityDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -27,7 +28,15 @@ class PropertyDomainToEntityMapperTest {
             type = "Hostel",
             facilities =
                 listOf(
-                    FacilityCategoryDomainModel("Amenities", listOf("WiFi", "Parking")),
+                    FacilityCategoryDomainModel(
+                        id = "AMENITIES",
+                        name = "Amenities",
+                        facilities =
+                            listOf(
+                                FacilityDomainModel(id = "WIFI", name = "WiFi"),
+                                FacilityDomainModel(id = "PARKING", name = "Parking"),
+                            ),
+                    ),
                 ),
             freeCancellationAvailable = true,
         )

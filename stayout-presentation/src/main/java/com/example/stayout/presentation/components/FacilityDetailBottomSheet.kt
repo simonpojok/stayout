@@ -21,21 +21,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.example.stayout.domain.model.FacilityDomainModel
 import com.example.stayout.presentation.theme.Dimens
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
 import com.example.stayout.presentation.util.facilityDescriptionRes
-import com.example.stayout.presentation.util.facilityIconFor
+import com.example.stayout.presentation.util.facilityIconForId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FacilityDetailBottomSheet(
-    facilityName: String,
+    facility: FacilityDomainModel,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val icon = facilityIconFor(facilityName)
-    val description = stringResource(facilityDescriptionRes(facilityName))
+    val icon = facilityIconForId(facility.id)
+    val description = stringResource(facilityDescriptionRes(facility.name))
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -68,7 +69,7 @@ fun FacilityDetailBottomSheet(
             }
             Spacer(modifier = Modifier.height(Dimens.spacing16))
             Text(
-                text = facilityName,
+                text = facility.name,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
@@ -90,7 +91,10 @@ fun FacilityDetailBottomSheet(
 @Composable
 private fun FacilityDetailBottomSheetWifiPreview() {
     StayScoutTheme {
-        FacilityDetailBottomSheet(facilityName = "Free WiFi", onDismiss = {})
+        FacilityDetailBottomSheet(
+            facility = FacilityDomainModel(id = "FREEWIFI", name = "Free WiFi"),
+            onDismiss = {},
+        )
     }
 }
 
@@ -98,6 +102,9 @@ private fun FacilityDetailBottomSheetWifiPreview() {
 @Composable
 private fun FacilityDetailBottomSheetBarPreview() {
     StayScoutTheme {
-        FacilityDetailBottomSheet(facilityName = "Bar", onDismiss = {})
+        FacilityDetailBottomSheet(
+            facility = FacilityDomainModel(id = "BAR", name = "Bar"),
+            onDismiss = {},
+        )
     }
 }

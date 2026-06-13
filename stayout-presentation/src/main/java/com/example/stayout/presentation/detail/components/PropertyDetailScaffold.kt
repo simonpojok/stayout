@@ -17,11 +17,10 @@ import com.example.stayout.presentation.preview.PreviewData.previewProperty
 import com.example.stayout.presentation.preview.PreviewData.previewRates
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
-import com.example.stayout.presentation.util.ugandaHotelLocations
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun PropertyDetailContent(
+internal fun PropertyDetailScaffold(
     state: PropertyDetailState,
     onBack: () -> Unit,
     onIntent: (PropertyDetailIntent) -> Unit,
@@ -31,16 +30,10 @@ internal fun PropertyDetailContent(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         topBar = {
-            BasicAppBar(
-                title = propertyName,
-                onNavigateBack = onBack,
-            )
+            BasicAppBar(title = propertyName, onNavigateBack = onBack)
         },
         bottomBar = {
-            BottomActionBar(
-                onIntent = onIntent,
-                applyNavigationBarPadding = true,
-            )
+            BottomActionBar(onIntent = onIntent, applyNavigationBarPadding = true)
         },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -53,10 +46,7 @@ internal fun PropertyDetailContent(
                         onRetry = { onIntent(PropertyDetailIntent.Retry) },
                     )
                 is PropertyDetailState.Success ->
-                    PropertyDetailBody(
-                        state = state,
-                        onIntent = onIntent,
-                    )
+                    PropertyDetailSections(state = state, onIntent = onIntent)
             }
         }
     }
@@ -68,11 +58,7 @@ internal fun PropertyDetailContent(
 @Composable
 private fun PropertyDetailSkeletonPreview() {
     StayScoutTheme {
-        PropertyDetailContent(
-            state = PropertyDetailState.Loading,
-            onBack = {},
-            onIntent = {},
-        )
+        PropertyDetailScaffold(state = PropertyDetailState.Loading, onBack = {}, onIntent = {})
     }
 }
 
@@ -80,7 +66,7 @@ private fun PropertyDetailSkeletonPreview() {
 @Composable
 private fun PropertyDetailErrorPreview() {
     StayScoutTheme {
-        PropertyDetailContent(
+        PropertyDetailScaffold(
             state = PropertyDetailState.Error("Property not found"),
             onBack = {},
             onIntent = {},
@@ -92,13 +78,8 @@ private fun PropertyDetailErrorPreview() {
 @Composable
 private fun PropertyDetailSuccessPreview() {
     StayScoutTheme {
-        PropertyDetailContent(
-            state =
-                PropertyDetailState.Success(
-                    property = previewProperty,
-                    rates = previewRates,
-                    mapLocation = ugandaHotelLocations.first(),
-                ),
+        PropertyDetailScaffold(
+            state = PropertyDetailState.Success(property = previewProperty, rates = previewRates),
             onBack = {},
             onIntent = {},
         )
@@ -109,12 +90,11 @@ private fun PropertyDetailSuccessPreview() {
 @Composable
 private fun PropertyDetailRatesUnavailablePreview() {
     StayScoutTheme {
-        PropertyDetailContent(
+        PropertyDetailScaffold(
             state =
                 PropertyDetailState.Success(
                     property = previewProperty,
                     rates = previewRates,
-                    mapLocation = ugandaHotelLocations.first(),
                     ratesUnavailable = true,
                 ),
             onBack = {},

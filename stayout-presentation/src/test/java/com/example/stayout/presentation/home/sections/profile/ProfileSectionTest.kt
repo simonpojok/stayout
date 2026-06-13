@@ -17,46 +17,24 @@ class ProfileSectionTest {
     val rule = createComposeRule()
 
     @Test
-    fun `displays primary button section header`() {
+    fun `displays profile title`() {
         rule.setContent {
             StayScoutTheme {
                 ProfileSection()
             }
         }
 
-        rule.onNodeWithText("Primary Button").assertIsDisplayed()
+        rule.onNodeWithText("Profile").assertIsDisplayed()
     }
 
     @Test
-    fun `displays tonal button section header`() {
+    fun `displays coming soon label`() {
         rule.setContent {
             StayScoutTheme {
                 ProfileSection()
             }
         }
 
-        rule.onNodeWithText("Tonal Button").assertIsDisplayed()
-    }
-
-    @Test
-    fun `displays outlined button section header`() {
-        rule.setContent {
-            StayScoutTheme {
-                ProfileSection()
-            }
-        }
-
-        rule.onNodeWithText("Outlined Button").assertIsDisplayed()
-    }
-
-    @Test
-    fun `displays text button section header`() {
-        rule.setContent {
-            StayScoutTheme {
-                ProfileSection()
-            }
-        }
-
-        rule.onNodeWithText("Text Button").assertIsDisplayed()
+        rule.onNodeWithText("Coming soon").assertIsDisplayed()
     }
 }

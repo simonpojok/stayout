@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Neither Chucker nor Showkase implement their own inset handling, so we opt out of
+        Android 15's forced edge-to-edge here to let the system reserve status/nav bar space.
+    -->
+    <style name="Theme.StayScout.Debug" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+</resources>

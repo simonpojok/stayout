@@ -2,6 +2,7 @@ package com.example.stayout.presentation.mapper
 
 import com.example.stayout.domain.model.CurrencyDomainModel
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
+import com.example.stayout.domain.model.FacilityDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.presentation.model.FacilityCategoryUiModel
 import com.example.stayout.presentation.provider.ResourceProvider
@@ -94,7 +95,11 @@ class PropertyToPresentationMapperTest {
 
     @Test
     fun `delegates facility mapping to FacilityCategoryToPresentationMapper`() {
-        val domainCategory = FacilityCategoryDomainModel("Services", listOf("WiFi"))
+        val domainCategory =
+            FacilityCategoryDomainModel(
+                name = "Services",
+                facilities = listOf(FacilityDomainModel(id = "FREEWIFI", name = "WiFi")),
+            )
         val uiCategory = FacilityCategoryUiModel("Services", listOf("WiFi"))
         every { facilityMapper.map(domainCategory) } returns uiCategory
 
