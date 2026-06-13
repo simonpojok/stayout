@@ -29,14 +29,15 @@ internal fun PropertyDetailScaffold(
     snackbarHostState: SnackbarHostState,
 ) {
     val propertyName = (state as? PropertyDetailState.Success)?.property?.name ?: ""
+    val isLoading = state is PropertyDetailState.Loading
 
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         topBar = {
-            BasicAppBar(title = propertyName, onNavigateBack = onBack)
+            BasicAppBar(title = propertyName, isLoading = isLoading, onNavigateBack = onBack)
         },
         bottomBar = {
-            BottomActionBar(onIntent = onIntent, applyNavigationBarPadding = true)
+            BottomActionBar(onIntent = onIntent, isLoading = isLoading, applyNavigationBarPadding = true)
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->

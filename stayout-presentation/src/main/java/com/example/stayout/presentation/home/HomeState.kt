@@ -6,7 +6,7 @@ sealed interface HomeState : BaseState {
     data object Initializing : HomeState
 
     data class Ready(
-        val isDarkTheme: Boolean,
+        val isDarkTheme: Boolean?,
         val searchQuery: String = "",
         val isOffline: Boolean = false,
     ) : HomeState

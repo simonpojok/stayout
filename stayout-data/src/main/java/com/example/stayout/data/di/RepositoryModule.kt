@@ -25,6 +25,7 @@ import com.example.stayout.data.remote.api.PropertyApi
 import com.example.stayout.data.remote.api.RatesApi
 import com.example.stayout.data.remote.api.StatsApi
 import com.example.stayout.data.repository.CommentRepositoryImpl
+import com.example.stayout.data.repository.FirebaseAnalyticsRepository
 import com.example.stayout.data.repository.LoggingAnalyticsRepository
 import com.example.stayout.data.repository.NetworkStatusRepositoryImpl
 import com.example.stayout.data.repository.PropertyRepositoryImpl
@@ -104,7 +105,11 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideAnalyticsRepository(impl: LoggingAnalyticsRepository): AnalyticsRepository = impl
+    fun provideAnalyticsRepository(
+        @IsDebug isDebug: Boolean,
+        logging: LoggingAnalyticsRepository,
+        firebase: FirebaseAnalyticsRepository,
+    ): AnalyticsRepository = if (isDebug) logging else firebase
 
     @Provides
     @Singleton

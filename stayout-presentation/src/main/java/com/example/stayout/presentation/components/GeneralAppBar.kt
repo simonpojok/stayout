@@ -51,6 +51,7 @@ fun GeneralAppBar(
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
+    isSearchEnabled: Boolean = true,
     onAvatarClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
 ) {
@@ -96,7 +97,7 @@ fun GeneralAppBar(
                         .height(40.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable { focusRequester.requestFocus() }
+                        .then(if (isSearchEnabled) Modifier.clickable { focusRequester.requestFocus() } else Modifier)
                         .padding(horizontal = Dimens.spacing12),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimens.spacing8),
@@ -114,6 +115,7 @@ fun GeneralAppBar(
                         Modifier
                             .weight(1f)
                             .focusRequester(focusRequester),
+                    enabled = isSearchEnabled,
                     singleLine = true,
                     textStyle =
                         MaterialTheme.typography.bodyMedium.copy(

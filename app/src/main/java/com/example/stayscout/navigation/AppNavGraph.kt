@@ -5,13 +5,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.example.stayout.presentation.detail.PropertyDetailEvent
 import com.example.stayout.presentation.detail.PropertyDetailScreen
 import com.example.stayout.presentation.home.HomeScreen
 
 @Composable
 fun AppNavGraph(
-    onThemeChange: (Boolean) -> Unit,
+    onThemeChange: (Boolean?) -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
     NavHost(
@@ -26,7 +27,12 @@ fun AppNavGraph(
                 onThemeChange = onThemeChange,
             )
         }
-        composable<Screen.Detail> {
+        composable<Screen.Detail>(
+            deepLinks =
+                listOf(
+                    navDeepLink { uriPattern = "https://stayscout.com/property/{propertyId}" },
+                ),
+        ) {
             PropertyDetailScreen(
                 onEvent = { event ->
                     when (event) {

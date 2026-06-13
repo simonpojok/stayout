@@ -20,10 +20,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val systemDark = isSystemInDarkTheme()
-            var isDark by rememberSaveable { mutableStateOf(systemDark) }
+            var isDark by rememberSaveable { mutableStateOf<Boolean?>(null) }
 
-            StayScoutTheme(darkTheme = isDark) {
+            StayScoutTheme(darkTheme = isDark ?: isSystemInDarkTheme()) {
                 AppNavGraph(
                     onThemeChange = { isDark = it },
                 )

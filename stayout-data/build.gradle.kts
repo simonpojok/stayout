@@ -31,6 +31,12 @@ android {
         create("qa") {}
     }
 
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
@@ -62,6 +68,8 @@ dependencies {
     releaseImplementation(libs.chucker.no.op)
     "qaImplementation"(libs.chucker.no.op)
     implementation(libs.timber)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
     implementation(libs.datastore.preferences)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

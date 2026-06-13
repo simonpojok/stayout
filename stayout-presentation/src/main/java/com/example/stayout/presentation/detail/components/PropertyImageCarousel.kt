@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -23,6 +24,8 @@ import coil.compose.AsyncImage
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.components.FeaturedBadge
 import com.example.stayout.presentation.theme.Dimens
+import com.example.stayout.presentation.theme.PreviewThemes
+import com.example.stayout.presentation.theme.StayScoutTheme
 
 @Composable
 internal fun PropertyImageCarousel(
@@ -92,3 +95,32 @@ internal fun PropertyImageCarousel(
         }
     }
 }
+
+// region Previews
+
+@PreviewThemes
+@Composable
+private fun PropertyImageCarouselEmptyPreview() {
+    StayScoutTheme {
+        PropertyImageCarousel(
+            name = "Kinlay House Hostel",
+            imageUrls = emptyList(),
+            modifier = Modifier.height(Dimens.spacing260),
+        )
+    }
+}
+
+@PreviewThemes
+@Composable
+private fun PropertyImageCarouselFeaturedPreview() {
+    StayScoutTheme {
+        PropertyImageCarousel(
+            name = "Kinlay House Hostel",
+            imageUrls = listOf("url1", "url2", "url3"),
+            modifier = Modifier.height(Dimens.spacing260),
+            isFeatured = true,
+        )
+    }
+}
+
+// endregion

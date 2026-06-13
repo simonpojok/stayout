@@ -49,14 +49,25 @@ class HomeViewModelTest {
         HomeViewModel(observeThemeUseCase, setThemeUseCase, observeNetworkStatusUseCase)
 
     @Test
-    fun `theme flow null transitions to Ready with isDarkTheme false`() =
+    fun `theme flow null transitions to Ready with isDarkTheme null`() =
         runTest(testDispatcher) {
             coEvery { observeThemeUseCase() } returns flowOf(null)
 
             val vm = createViewModel()
             val state = vm.state.value as HomeState.Ready
 
-            assertFalse(state.isDarkTheme)
+            assertEquals(null, state.isDarkTheme)
+        }
+
+    @Test
+    fun `theme flow null emits ThemeChanged with null`() =
+        runTest(testDispatcher) {
+            coEvery { observeThemeUseCase() } returns flowOf(null)
+
+            val vm = createViewModel()
+            val event = vm.events.first() as HomeEvent.ThemeChanged
+
+            assertEquals(null, event.isDarkTheme)
         }
 
     @Test
@@ -67,7 +78,7 @@ class HomeViewModelTest {
             val vm = createViewModel()
             val state = vm.state.value as HomeState.Ready
 
-            assertTrue(state.isDarkTheme)
+            assertEquals(true, state.isDarkTheme)
         }
 
     @Test
@@ -78,7 +89,7 @@ class HomeViewModelTest {
             val vm = createViewModel()
             val state = vm.state.value as HomeState.Ready
 
-            assertFalse(state.isDarkTheme)
+            assertEquals(false, state.isDarkTheme)
         }
 
     @Test
@@ -89,7 +100,7 @@ class HomeViewModelTest {
             val vm = createViewModel()
             val event = vm.events.first() as HomeEvent.ThemeChanged
 
-            assertTrue(event.isDarkTheme)
+            assertEquals(true, event.isDarkTheme)
         }
 
     @Test
@@ -98,7 +109,7 @@ class HomeViewModelTest {
             coEvery { observeThemeUseCase() } returns flowOf(true)
 
             val vm = createViewModel()
-            vm.onIntent(HomeIntent.ToggleTheme)
+            vm.onIntent(HomeIntent.ToggleTheme(currentEffectiveIsDark = true))
 
             coVerify { setThemeUseCase(false) }
         }
@@ -109,7 +120,7 @@ class HomeViewModelTest {
             coEvery { observeThemeUseCase() } returns flowOf(false)
 
             val vm = createViewModel()
-            vm.onIntent(HomeIntent.ToggleTheme)
+            vm.onIntent(HomeIntent.ToggleTheme(currentEffectiveIsDark = false))
 
             coVerify { setThemeUseCase(true) }
         }
@@ -121,7 +132,7 @@ class HomeViewModelTest {
             coEvery { observeThemeUseCase() } returns emptyFlow()
 
             val vm = HomeViewModel(observeThemeUseCase, setThemeUseCase, observeNetworkStatusUseCase)
-            vm.onIntent(HomeIntent.ToggleTheme)
+            vm.onIntent(HomeIntent.ToggleTheme(currentEffectiveIsDark = false))
 
             coVerify(exactly = 0) { setThemeUseCase(any()) }
         }
@@ -187,5 +198,29 @@ class HomeViewModelTest {
 
             val themeEvent = vm.events.first()
             assertTrue(themeEvent is HomeEvent.ThemeChanged)
+        }
+
+    @Test
+    fun `TapAvatar emits ShowComingSoon event`() =
+        runTest(testDispatcher) {
+            coEvery { observeThemeUseCase() } returns flowOf(false)
+
+            val vm = createViewModel()
+            vm.onIntent(HomeIntent.TapAvatar)
+
+            val event = vm.events.drop(1).first()
+            assertTrue(event is HomeEvent.ShowComingSoon)
+        }
+
+    @Test
+    fun `TapNotifications emits ShowComingSoon event`() =
+        runTest(testDispatcher) {
+            coEvery { observeThemeUseCase() } returns flowOf(false)
+
+            val vm = createViewModel()
+            vm.onIntent(HomeIntent.TapNotifications)
+
+            val event = vm.events.drop(1).first()
+            assertTrue(event is HomeEvent.ShowComingSoon)
         }
 }

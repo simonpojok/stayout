@@ -1,5 +1,6 @@
 package com.example.stayout.presentation.home
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +35,7 @@ import com.example.stayout.presentation.home.sections.saved.SavedSection
 @Composable
 fun HomeScreen(
     onNavigateToDetail: (Int) -> Unit,
-    onThemeChange: (Boolean) -> Unit,
+    onThemeChange: (Boolean?) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     tabNavController: NavHostController = rememberNavController(),
@@ -45,18 +46,20 @@ fun HomeScreen(
     val currentRoute = navBackStackEntry?.destination?.route
     val snackbarHostState = remember { SnackbarHostState() }
     val backOnlineMessage = stringResource(R.string.banner_back_online_message)
+    val comingSoonMessage = stringResource(R.string.coming_soon)
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
                 is HomeEvent.ThemeChanged -> currentOnThemeChange(event.isDarkTheme)
                 HomeEvent.BackOnline -> snackbarHostState.showSnackbar(backOnlineMessage)
+                HomeEvent.ShowComingSoon -> snackbarHostState.showSnackbar(comingSoonMessage)
             }
         }
     }
 
     val readyState = state as? HomeState.Ready
-    val isDarkTheme = readyState?.isDarkTheme ?: false
+    val effectiveDark = readyState?.isDarkTheme ?: isSystemInDarkTheme()
 
     Scaffold(
         modifier = modifier,
@@ -65,8 +68,11 @@ fun HomeScreen(
             GeneralAppBar(
                 searchQuery = readyState?.searchQuery ?: "",
                 onSearchQueryChange = { viewModel.onIntent(HomeIntent.UpdateSearch(it)) },
-                isDarkTheme = isDarkTheme,
-                onToggleTheme = { viewModel.onIntent(HomeIntent.ToggleTheme) },
+                isDarkTheme = effectiveDark,
+                onToggleTheme = { viewModel.onIntent(HomeIntent.ToggleTheme(effectiveDark)) },
+                isSearchEnabled = readyState != null,
+                onAvatarClick = { viewModel.onIntent(HomeIntent.TapAvatar) },
+                onNotificationsClick = { viewModel.onIntent(HomeIntent.TapNotifications) },
             )
         },
         bottomBar = {

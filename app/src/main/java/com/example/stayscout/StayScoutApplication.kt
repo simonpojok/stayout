@@ -1,6 +1,7 @@
 package com.example.stayscout
 
 import android.app.Application
+import com.example.stayscout.initializer.CrashlyticsInitializer
 import com.example.stayscout.initializer.DebugInitializer
 import com.example.stayscout.initializer.OsmDroidInitializer
 import dagger.hilt.android.HiltAndroidApp
@@ -11,5 +12,6 @@ class StayScoutApplication : Application() {
         super.onCreate()
         if (BuildConfig.DEBUG) DebugInitializer.install(this)
         OsmDroidInitializer.install(this)
+        if (!BuildConfig.DEBUG) CrashlyticsInitializer.install()
     }
 }

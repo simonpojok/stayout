@@ -30,14 +30,17 @@ class HomeViewModel
 
         override fun onIntent(intent: HomeIntent) {
             when (intent) {
-                HomeIntent.ToggleTheme -> {
-                    val current = currentState as? HomeState.Ready ?: return
-                    persist(!current.isDarkTheme)
+                is HomeIntent.ToggleTheme -> {
+                    if (currentState !is HomeState.Ready) return
+                    persist(!intent.currentEffectiveIsDark)
                 }
                 is HomeIntent.UpdateSearch ->
                     updateState {
                         (this as? HomeState.Ready)?.copy(searchQuery = intent.query) ?: this
                     }
+                HomeIntent.TapAvatar,
+                HomeIntent.TapNotifications,
+                -> emitEvent(HomeEvent.ShowComingSoon)
             }
         }
 
@@ -45,14 +48,13 @@ class HomeViewModel
             viewModelScope.launch {
                 observeThemeUseCase()
                     .onEach { stored ->
-                        val isDark = stored ?: false
                         updateState {
                             when (this) {
-                                HomeState.Initializing -> HomeState.Ready(isDarkTheme = isDark)
-                                is HomeState.Ready -> copy(isDarkTheme = isDark)
+                                HomeState.Initializing -> HomeState.Ready(isDarkTheme = stored)
+                                is HomeState.Ready -> copy(isDarkTheme = stored)
                             }
                         }
-                        emitEvent(HomeEvent.ThemeChanged(isDarkTheme = isDark))
+                        emitEvent(HomeEvent.ThemeChanged(isDarkTheme = stored))
                     }.launchIn(this)
             }
         }

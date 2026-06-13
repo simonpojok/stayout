@@ -40,6 +40,7 @@
     <string name="coming_soon_saved">Saved — coming soon</string>
     <string name="coming_soon_bookings">Bookings — coming soon</string>
     <string name="coming_soon_profile">Profile — coming soon</string>
+    <string name="coming_soon">Coming soon</string>
 
     <!-- Component showcase -->
     <string name="showcase_title">Components</string>
@@ -111,6 +112,12 @@
 
     <!-- Location section -->
     <string name="btn_show_on_map">Show on Map</string>
+
+    <!-- Location permission rationale -->
+    <string name="rationale_location_title">Allow Location Access</string>
+    <string name="rationale_location_body">We use your location to show where you are on the map and help with directions.</string>
+    <string name="btn_dismiss">Dismiss</string>
+    <string name="btn_grant_location">Allow</string>
 
     <!-- Offline banner -->
     <string name="banner_offline_message">You\'re offline — showing cached data</string>
