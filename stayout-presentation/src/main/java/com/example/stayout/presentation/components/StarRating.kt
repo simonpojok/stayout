@@ -33,7 +33,7 @@ fun StarRating(
     val fullStars = starScore.toInt()
     val hasHalfStar = (starScore - fullStars) >= 0.5
     val emptyStars = 5 - fullStars - if (hasHalfStar) 1 else 0
-    val contentDesc = stringResource(R.string.cd_star_rating_format, "%.1f".format(starScore), ratingCount)
+    val contentDesc = stringResource(R.string.cd_star_rating_format, "%.1f".format(rating), ratingCount)
 
     Row(
         modifier = modifier.semantics { contentDescription = contentDesc },
@@ -66,7 +66,7 @@ fun StarRating(
         }
         Spacer(modifier = Modifier.width(Dimens.spacing4))
         Text(
-            text = "%.1f · %s".format(starScore, ratingCount),
+            text = "%.1f · %s".format(rating, ratingCount),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

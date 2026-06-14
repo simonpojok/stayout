@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import com.example.stayout.domain.model.AnalyticsEvent
 import com.example.stayout.domain.repository.AnalyticsRepository
+import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -13,10 +14,16 @@ class FirebaseAnalyticsRepository
     constructor(
         @ApplicationContext private val context: Context,
     ) : AnalyticsRepository {
-        private val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(context) }
+        private val analytics: FirebaseAnalytics? by lazy {
+            if (FirebaseApp.getApps(context).isEmpty()) {
+                null
+            } else {
+                FirebaseAnalytics.getInstance(context)
+            }
+        }
 
         override fun track(event: AnalyticsEvent) {
-            analytics.logEvent(event.toFirebaseName(), event.toFirebaseParams())
+            analytics?.logEvent(event.toFirebaseName(), event.toFirebaseParams())
         }
 
         private fun AnalyticsEvent.toFirebaseName(): String =

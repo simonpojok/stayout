@@ -12,6 +12,6 @@ class StayScoutApplication : Application() {
         super.onCreate()
         if (BuildConfig.DEBUG) DebugInitializer.install(this)
         OsmDroidInitializer.install(this)
-        if (!BuildConfig.DEBUG) CrashlyticsInitializer.install()
+        if (!BuildConfig.DEBUG) CrashlyticsInitializer.install(this)
     }
 }

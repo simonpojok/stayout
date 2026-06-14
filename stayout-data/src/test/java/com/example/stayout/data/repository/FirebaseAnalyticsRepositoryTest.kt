@@ -2,6 +2,7 @@ package com.example.stayout.data.repository
 
 import android.content.Context
 import com.example.stayout.domain.model.AnalyticsEvent
+import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import io.mockk.every
 import io.mockk.mockk
@@ -19,7 +20,9 @@ class FirebaseAnalyticsRepositoryTest {
 
     @Before
     fun setUp() {
+        mockkStatic(FirebaseApp::class)
         mockkStatic(FirebaseAnalytics::class)
+        every { FirebaseApp.getApps(any()) } returns listOf(mockk())
         every { FirebaseAnalytics.getInstance(any()) } returns mockAnalytics
         repository = FirebaseAnalyticsRepository(mockContext)
     }
