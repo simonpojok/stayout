@@ -17,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
 import com.example.stayout.domain.model.FacilityDomainModel
 import com.example.stayout.presentation.R
@@ -55,6 +57,7 @@ internal fun PropertyFacilitiesSection(
         Text(
             text = stringResource(R.string.label_facilities),
             style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() },
         )
         Spacer(modifier = Modifier.height(Dimens.spacing8))
         LazyRow(

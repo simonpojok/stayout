@@ -7,7 +7,9 @@ import com.example.stayout.data.local.mapper.LocationEntityToDomainMapper
 import com.example.stayout.data.local.mapper.PropertyDomainToEntityMapper
 import com.example.stayout.data.local.mapper.PropertyEntityToDomainMapper
 import com.example.stayout.data.mapper.PropertiesResponseToDomainMapper
+import com.example.stayout.data.mapper.ThrowableToInternetConnectionErrorMapper
 import com.example.stayout.data.remote.api.PropertyApi
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.repository.PropertyRepository
@@ -24,6 +26,7 @@ class PropertyRepositoryImpl(
     private val propertyDomainToEntity: PropertyDomainToEntityMapper,
     private val locationEntityToDomain: LocationEntityToDomainMapper,
     private val locationDomainToEntity: LocationDomainToEntityMapper,
+    private val throwableToInternetConnectionError: ThrowableToInternetConnectionErrorMapper,
 ) : PropertyRepository {
     override suspend fun getProperties(): Result<Pair<LocationDomainModel, List<PropertyDomainModel>>> {
         val start = System.currentTimeMillis()
@@ -34,8 +37,21 @@ class PropertyRepositoryImpl(
             persist(result)
             Result.success(result)
         } catch (e: Exception) {
-            loadFromCache() ?: Result.failure(e)
+            loadFromCache() ?: Result.failure(
+                InternetConnectionException(throwableToInternetConnectionError.map(e), e),
+            )
         }
+    }
+
+    override suspend fun getPropertyById(id: Int): Result<PropertyDomainModel?> {
+        val start = System.currentTimeMillis()
+        return getProperties()
+            .map { (_, properties) -> properties.find { it.id == id } }
+            .also {
+                if (it.isSuccess) {
+                    statsRepository.trackEvent(StatsEvent.LOAD_DETAILS, System.currentTimeMillis() - start)
+                }
+            }
     }
 
     private suspend fun persist(result: Pair<LocationDomainModel, List<PropertyDomainModel>>) {

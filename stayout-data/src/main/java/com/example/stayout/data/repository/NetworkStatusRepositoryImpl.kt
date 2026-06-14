@@ -36,12 +36,20 @@ class NetworkStatusRepositoryImpl
                         override fun onUnavailable() {
                             trySend(false)
                         }
+
+                        override fun onCapabilitiesChanged(
+                            network: Network,
+                            networkCapabilities: NetworkCapabilities,
+                        ) {
+                            trySend(networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED))
+                        }
                     }
 
                 val request =
                     NetworkRequest
                         .Builder()
                         .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
                         .build()
 
                 trySend(isAnyNetworkAvailable())
@@ -53,5 +61,8 @@ class NetworkStatusRepositoryImpl
         private fun isAnyNetworkAvailable(): Boolean =
             connectivityManager.activeNetwork
                 ?.let { connectivityManager.getNetworkCapabilities(it) }
-                ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+                ?.let { capabilities ->
+                    capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                        capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                } == true
     }

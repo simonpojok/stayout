@@ -1,6 +1,6 @@
 # StayScout
 
-An Android app for browsing and exploring hostel/property listings, built as part of a code challenge. It fetches properties from a remote API, caches them locally for offline use, displays live exchange rates, and lets users explore property details with multi-currency pricing.
+An Android app for browsing and exploring hostel and property listings, built with Clean Architecture + MVI. It fetches properties from a remote API, caches them locally for offline use, displays live exchange rates, and lets users explore property details with multi-currency pricing, interactive maps, and guest reviews.
 
 ---
 
@@ -14,8 +14,41 @@ An Android app for browsing and exploring hostel/property listings, built as par
 - [Running the App](#running-the-app)
 - [Developer Onboarding](#developer-onboarding)
 - [Quality Gates](#quality-gates)
+- [Production Readiness](#production-readiness)
 - [Implementation Status](#implementation-status)
 - [Planned Features](#planned-features)
+
+---
+
+## Screenshots
+
+### Explore
+
+| Light | Dark |
+|:---:|:---:|
+| <img src="Screenshot_1781377339.png" width="220"/> | <img src="Screenshot_1781377406.png" width="220"/> |
+
+### Property Detail
+
+| Top — Light | Top — Dark |
+|:---:|:---:|
+| <img src="Screenshot_1781377377.png" width="220"/> | <img src="Screenshot_1781377412.png" width="220"/> |
+
+| Bottom — Light | Bottom — Dark |
+|:---:|:---:|
+| <img src="Screenshot_1781377384.png" width="220"/> | <img src="Screenshot_1781377417.png" width="220"/> |
+
+### Guest Reviews & Loading
+
+| Guest Reviews | Detail Skeleton |
+|:---:|:---:|
+| <img src="Screenshot_1781377387.png" width="220"/> | <img src="Screenshot_1781377368.png" width="220"/> |
+
+### Permission Flows
+
+| Notifications | Location |
+|:---:|:---:|
+| <img src="Screenshot_1781377331.png" width="220"/> | <img src="Screenshot_1781377372.png" width="220"/> |
 
 ---
 
@@ -26,19 +59,25 @@ An Android app for browsing and exploring hostel/property listings, built as par
 | Language | Kotlin | 2.3.21 |
 | UI | Jetpack Compose + Material 3 | BOM 2026.02.01 |
 | DI | Hilt | 2.59.2 |
-| Navigation | Navigation Compose | 2.9.8 |
+| Navigation | Navigation Compose (type-safe) | 2.9.8 |
 | Networking | Retrofit + OkHttp | 2.11.0 / 4.12.0 |
 | Serialization | kotlinx-serialization-json | 1.7.3 |
 | Image loading | Coil | 2.7.0 |
-| Local database | Room | 2.7.1 |
+| Local database | Room + SQLCipher | 2.7.1 / 4.5.4 |
+| Theme persistence | DataStore Preferences | 1.1.1 |
+| Maps | OSMDroid | 6.1.18 |
+| Crash reporting | Firebase Crashlytics | BOM 33.15.0 |
+| Analytics | Firebase Analytics | BOM 33.15.0 |
 | Async | Kotlin Coroutines + Flow | 1.9.0 |
-| HTTP inspector | Chucker (debug only) | 4.0.0 |
+| HTTP inspector | Chucker (debug / QA only) | 4.1.0 |
 | Code generation | KSP | 2.3.9 |
 | Java 8+ APIs on API 24 | Core Library Desugaring | 2.1.4 |
-| Linting | ktlint + Twitter Compose Rules | 1.5.0 / 0.6.0 |
+| Linting | ktlint + Compose Rules | 1.5.0 / 0.6.0 |
 | Static analysis | detekt | 2.0.0-alpha.3 |
 | Code coverage | Kover | 0.9.8 |
+| Component browser | Showkase | 1.0.4 |
 | Testing | JUnit 4 + MockK + Coroutines Test | — |
+| CI/CD | GitHub Actions | — |
 
 ---
 
@@ -49,7 +88,8 @@ StayScout uses **Clean Architecture** split across four Gradle modules, combined
 ```
 ┌────────────────────────────────────────────────────────────┐
 │                          :app                              │
-│  Entry point · Hilt setup · Navigation graph              │
+│  Entry point · Hilt setup · Navigation graph               │
+│  App Links deep links · Initializers                       │
 └───────────────────────┬────────────────────────────────────┘
                         │ depends on
           ┌─────────────┴──────────────┐
@@ -62,6 +102,7 @@ StayScout uses **Clean Architecture** split across four Gradle modules, combined
 │ Repository impls │      │  UI components            │
 │ Remote mappers   │      │  Presentation mappers     │
 │ Local mappers    │      │  UI models                │
+│ Firebase repos   │      │  Shimmer skeletons        │
 └────────┬─────────┘      └──────────┬────────────────┘
          │                           │
          └──────────┬────────────────┘
@@ -81,9 +122,9 @@ StayScout uses **Clean Architecture** split across four Gradle modules, combined
 Every screen follows a strict three-file MVI contract:
 
 ```
-PropertyListState.kt   ← sealed interface (Loading | Success | Error)
-PropertyListIntent.kt  ← sealed interface (user actions)
-PropertyListEvent.kt   ← sealed interface (one-shot side effects)
+HomeState.kt    ← sealed interface (Initializing | Ready)
+HomeIntent.kt   ← sealed interface (user actions)
+HomeEvent.kt    ← sealed interface (one-shot side effects)
 ```
 
 `BaseViewModel<State, Intent, Event>` wires them together. ViewModels expose:
@@ -111,11 +152,11 @@ Repository (interface in :domain, impl in :data)
 
 ### Offline-first caching
 
-Both `PropertyRepositoryImpl` and `RatesRepositoryImpl` attempt the network first, persist the response to Room, and fall back to the cached data on failure. The app is fully usable without a connection if it has been opened at least once online.
+Both `PropertyRepositoryImpl` and `RatesRepositoryImpl` attempt the network first, persist the response to Room (encrypted with SQLCipher), and fall back to the cached data on failure. The app is fully usable without a connection if it has been opened at least once online.
 
 ### Network status
 
-`NetworkStatusRepositoryImpl` wraps `ConnectivityManager.NetworkCallback` in a `callbackFlow`. `ObserveNetworkStatusUseCase` exposes this as a `Flow<Boolean>` and both ViewModels subscribe to it on init, reflecting offline status in the UI via an `OfflineBanner` component.
+`NetworkStatusRepositoryImpl` wraps `ConnectivityManager.NetworkCallback` in a `callbackFlow`. `ObserveNetworkStatusUseCase` exposes this as a `Flow<Boolean>`. ViewModels subscribe to it on init, driving the `OfflineBanner` and a "back online" snackbar.
 
 ---
 
@@ -126,21 +167,22 @@ StayScout/
 ├── app/                            # :app module
 │   └── src/main/
 │       ├── MainActivity.kt         # Single Activity, theme state holder
-│       ├── StayScoutApplication.kt # Hilt @HiltAndroidApp entry point
-│       ├── di/AppModule.kt         # App-level Hilt bindings
-│       └── navigation/AppNavGraph.kt # Compose navigation host
+│       ├── StayScoutApplication.kt # Hilt entry point; installs initializers
+│       ├── di/AppModule.kt         # App-level Hilt bindings (IsDebug, URLs)
+│       ├── initializer/            # DebugInitializer, OsmDroidInitializer, CrashlyticsInitializer
+│       └── navigation/AppNavGraph.kt # Type-safe nav host with deep link wiring
 │
 ├── stayout-domain/                 # :stayout-domain module (pure Kotlin)
 │   └── src/main/java/.../domain/
-│       ├── model/                  # Domain models (PropertyDomainModel, etc.)
-│       ├── repository/             # Repository interfaces
+│       ├── model/                  # Domain models (PropertyDomainModel, AnalyticsEvent, …)
+│       ├── repository/             # Repository interfaces including AnalyticsRepository
 │       └── usecase/                # Abstract use cases + base classes
 │
 ├── stayout-data/                   # :stayout-data module
 │   └── src/main/java/.../data/
 │       ├── di/                     # Hilt modules (Network, Database, Mapper, Repository)
 │       ├── local/
-│       │   ├── StayScoutDatabase.kt  # Room database
+│       │   ├── StayScoutDatabase.kt  # Room + SQLCipher encrypted database
 │       │   ├── dao/                  # Room DAOs
 │       │   ├── entity/               # Room entities
 │       │   ├── mapper/               # Entity ↔ Domain mappers
@@ -149,19 +191,21 @@ StayScout/
 │       │   ├── api/                  # Retrofit service interfaces
 │       │   └── model/                # Network response data models
 │       ├── mapper/                   # Network model → Domain mappers
-│       ├── repository/               # Repository implementations
+│       ├── repository/               # Repository implementations incl. Firebase variants
 │       └── serializer/               # BigDecimalSerializer, LocalDateSerializer
 │
 └── stayout-presentation/           # :stayout-presentation module
     └── src/main/java/.../presentation/
         ├── base/                   # BaseViewModel, BaseState/Intent/Event
-        ├── components/             # Reusable Compose components
-        ├── list/                   # Property list screen (MVI: State/Intent/Event/ViewModel/Screen)
-        ├── detail/                 # Property detail screen (MVI: State/Intent/Event/ViewModel/Screen)
+        ├── components/             # Reusable Compose components (skeletons, cards, map, …)
+        ├── home/                   # Home shell screen + tab navigation (MVI)
+        │   └── sections/           # Explore, Saved, Bookings, Profile tab screens
+        ├── detail/                 # Property detail screen (MVI)
+        │   └── components/         # PropertyDetailSections, Carousel, Rating, Location, Comments
         ├── mapper/                 # Domain → UI model mappers
         ├── model/                  # UI models (PropertyUiModel, etc.)
         ├── preview/                # PreviewData for Compose previews
-        ├── provider/               # AndroidResourceProvider (string resources in ViewModels)
+        ├── provider/               # AndroidResourceProvider
         └── theme/                  # Colors, Typography, Shapes, Dimens, PreviewThemes
 ```
 
@@ -173,7 +217,7 @@ StayScout/
 
 | Tool | Version |
 |---|---|
-| Android Studio | Meerkat 2025.1.1+ (or any version supporting AGP 9.1.1) |
+| Android Studio | Meerkat 2025.1.1+ (AGP 9.1.1+) |
 | JDK | 11 (bundled in Android Studio JBR) |
 | Android SDK | API 24 (min) — API 36 (compile / target) |
 | Git | 2.x+ |
@@ -191,7 +235,7 @@ cd StayScout
 ./scripts/install-git-hooks.sh
 ```
 
-This sets `core.hooksPath = .githooks` so the pre-commit and commit-msg hooks are active.
+This sets `core.hooksPath = .githooks` so pre-commit and commit-msg hooks are active.
 
 ### 3. Environment / build configuration
 
@@ -203,12 +247,13 @@ The app reads API base URLs from per-variant properties files:
 | `config/qa.properties` | `qa` |
 | `config/release.properties` | `release` |
 
-Each file must contain:
+Each must contain:
 ```properties
 BASE_URL=https://gist.githubusercontent.com/
+JSON_PLACEHOLDER_BASE_URL=https://jsonplaceholder.typicode.com/
 ```
 
-These files are committed to the repository. Do **not** put secrets in these files — they are version-controlled.
+These files are committed to the repository. Do **not** put secrets in these files.
 
 ### 4. Open in Android Studio
 
@@ -228,7 +273,7 @@ Select the `debug` or `qa` build variant from the **Build Variants** panel, then
 # Build and install the debug APK
 ./gradlew installDebug
 
-# Build the QA APK
+# Build the QA APK (minified, non-debuggable)
 ./gradlew assembleQa
 
 # Run all unit tests
@@ -256,7 +301,7 @@ Select the `debug` or `qa` build variant from the **Build Variants** panel, then
 
 ### Step 1 — Understand the module boundaries
 
-Before writing any code, read this rule: **no module may depend on a higher-level module.**
+No module may depend on a higher-level module:
 
 ```
 :app → :stayout-presentation → :stayout-domain  ✅
@@ -303,7 +348,7 @@ abstract class GetSomethingUseCase(
 ) : BaseNoParamUseCase<Result<SomethingDomainModel>>(dispatcher)
 ```
 
-2. Implement it in `:stayout-data` (or `:stayout-domain` if it has no I/O):
+2. Implement it in `:stayout-data`:
 
 ```kotlin
 class GetSomethingUseCaseImpl @Inject constructor(
@@ -314,7 +359,7 @@ class GetSomethingUseCaseImpl @Inject constructor(
 }
 ```
 
-3. Bind the impl in a Hilt module (`DomainModule.kt`).
+3. Bind the impl in a Hilt module.
 
 ### Step 5 — Writing tests
 
@@ -337,7 +382,7 @@ Direct commits to `main`, `master`, or `develop` are blocked by the pre-commit h
 
 ### Step 7 — Before pushing
 
-The pre-commit hook runs these checks automatically, but you can run them manually at any time:
+The pre-commit hook runs these checks automatically, but you can also run them manually:
 
 ```bash
 ./gradlew ktlintFormat          # auto-fix formatting
@@ -364,14 +409,56 @@ The pre-commit hook enforces (in order):
 
 The commit-msg hook enforces that the first line matches `MOBI-<N>: <message>`.
 
+CI additionally runs ktlint, detekt, unit tests, and Kover on every push and pull request via GitHub Actions (`.github/workflows/ci.yml`). The `release-bundle` job on `main` produces a signed AAB using keystore credentials from GitHub Secrets.
+
 **Coverage exclusions** (no tests required):
 - Hilt-generated and DI module files
 - Compose screens, components, theme files
 - Android framework wrappers (`*Activity`, `*Application`, `*Database`)
 - Sealed event/intent declarations
 - Abstract base classes
-- Pure delegation use cases (`GetPropertiesUseCase`, `GetExchangeRatesUseCase`, `ObserveNetworkStatusUseCase`)
-- Framework adapter files (`AndroidResourceProvider`, `NetworkStatusRepositoryImpl`)
+- Initializer objects
+- Room migration files
+
+---
+
+## Production Readiness
+
+### Release signing
+
+Release builds are signed using credentials loaded from `config/keystore.properties` (gitignored) or environment variables in CI:
+
+| Variable | Source |
+|---|---|
+| `KEYSTORE_FILE_PATH` | Path to the `.jks` file |
+| `KEYSTORE_PASSWORD` | Store password |
+| `KEY_ALIAS` | Key alias |
+| `KEY_PASSWORD` | Key password |
+
+To set up locally: generate a keystore with `keytool -genkey -v -keystore release.jks -alias <alias> -keyalg RSA -keysize 2048 -validity 10000`, then fill in `config/keystore.properties`.
+
+### Firebase
+
+The app is wired for Firebase Crashlytics (non-debug builds) and Firebase Analytics (in-app event tracking via `AnalyticsRepository`). To activate:
+
+1. Create a Firebase project and download `google-services.json` → place in `app/`
+2. Uncomment the two plugin lines at the top of `app/build.gradle.kts`
+3. The `LoggingAnalyticsRepository` (Timber) is used in debug; `FirebaseAnalyticsRepository` is used in all other variants automatically via the `@IsDebug` Hilt qualifier
+
+### Certificate pinning
+
+`NetworkModule` adds a `CertificatePinner` to the OkHttp client in non-debug builds. Replace the placeholder SHA-256 hashes in `NetworkModule.kt` with pins from your production certificate:
+
+```bash
+openssl s_client -connect <your-api-host>:443 </dev/null \
+  | openssl x509 -pubkey -noout \
+  | openssl pkey -pubin -outform DER \
+  | openssl dgst -sha256 -binary | base64
+```
+
+### Deep links / App Links
+
+The app handles `https://stayscout.com/property/{propertyId}` URLs. To activate verified App Links, host `/.well-known/assetlinks.json` on your domain with the app's SHA-256 signing fingerprint.
 
 ---
 
@@ -381,61 +468,69 @@ The commit-msg hook enforces that the first line matches `MOBI-<N>: <message>`.
 
 | # | Requirement | Status | Notes |
 |---|---|---|---|
-| 1 | Fetch and display list of properties | ✅ Done | `PropertyListScreen` with `PropertyListViewModel` |
-| 2 | Property list with name, rating, price, featured badge, type | ✅ Done | `PropertyCard` component |
-| 3 | Property detail screen | ✅ Done | `PropertyDetailScreen` with full detail body |
-| 4 | Property detail: image, name, address, rating, type, overview | ✅ Done | Hero image via Coil, all fields displayed |
-| 5 | Property detail: facilities list | ✅ Done | `FlowRow` chips grouped by category |
-| 6 | Currency conversion (EUR / USD / GBP) | ✅ Done | Live rates from API, `CurrencySelector` component |
-| 7 | Exchange rates API integration | ✅ Done | `RatesRepositoryImpl` + `GetExchangeRatesUseCase` |
-| 8 | Offline support / caching | ✅ Done | Room DB for properties, location, and rates; cache fallback on network failure |
-| 9 | Stats tracking (load durations) | ✅ Done | `StatsRepositoryImpl` fires-and-forgets via `@ApplicationScope` coroutine |
-| 10 | Search / filter properties by name | ✅ Done | `UpdateSearch` intent, case-insensitive filter |
-| 11 | Loading states | ✅ Done | Shimmer skeleton on detail, `LoadingState` spinner on list |
+| 1 | Fetch and display list of properties | ✅ Done | Explore tab with `HomeViewModel` |
+| 2 | Property list: name, rating, price, featured badge, type | ✅ Done | `PropertyCard` component |
+| 3 | Property detail screen | ✅ Done | `PropertyDetailScreen` full data |
+| 4 | Detail: image, name, address, rating, type, overview | ✅ Done | Hero carousel, all fields displayed |
+| 5 | Detail: facilities list | ✅ Done | Icon grid with `FlowRow` chips |
+| 6 | Currency conversion (EUR / USD / GBP) | ✅ Done | Live rates, `CurrencySelector` |
+| 7 | Exchange rates API integration | ✅ Done | `RatesRepositoryImpl` + use case |
+| 8 | Offline support / caching | ✅ Done | Room + SQLCipher; falls back to cache on failure |
+| 9 | Stats tracking | ✅ Done | `StatsRepositoryImpl` fire-and-forget |
+| 10 | Search / filter by name | ✅ Done | Case-insensitive `UpdateSearch` intent |
+| 11 | Loading states | ✅ Done | Shimmer skeletons on detail, app bar, bottom bar; spinner on list |
 | 12 | Error states with retry | ✅ Done | `ErrorState` component with retry callback |
 
 ### Beyond the challenge requirements
 
-These were added on top of the challenge spec:
-
 | Feature | Description |
 |---|---|
 | Clean Architecture modules | Four Gradle modules with enforced dependency direction |
-| MVI pattern with base classes | `BaseViewModel<State, Intent, Event>` shared across all screens |
+| MVI with base classes | `BaseViewModel<State, Intent, Event>` shared across all screens |
+| Type-safe navigation | `composable<Screen.Detail>` with serializable route objects |
 | Pull-to-refresh | `PullToRefreshBox` on the property list |
-| Infinite scroll / pagination | Loads 6 properties per page, triggers `LoadMore` near end of list |
-| Scroll position restoration | `SavedStateHandle` persists the first visible list item across back-stack |
-| Dark / light theme toggle | Persistent in-session toggle via `MainActivity` state hoisting |
-| Offline banner | `OfflineBanner` component shown at the top of both screens when offline |
-| Free cancellation badge | Highlighted in detail screen with a themed `tertiaryContainer` surface |
-| Shimmer skeleton loading | Animated placeholder on detail screen while data loads |
-| Rates unavailable warning | Error label shown if exchange rates could not be fetched |
-| HTML overview rendering | `HtmlCompat.fromHtml` strips HTML tags from the overview text |
-| Chucker (debug/QA) | In-app HTTP inspector; excluded from release builds |
-| ktlint + Twitter Compose Rules | Formatting enforced with Compose-specific rule set |
+| Infinite scroll / pagination | Loads 6 properties per page; `LoadMore` intent fires near end of list |
+| Scroll position restoration | `SavedStateHandle` persists first visible list item across back-stack |
+| Persistent dark / light theme | DataStore-backed theme toggle; survives app restart |
+| Offline banner | `OfflineBanner` shown at top of Home; "back online" snackbar on reconnect |
+| Image gallery carousel | Swipeable hero image pager with page dots and `pagerState` |
+| Interactive property map | OSMDroid map always visible in detail screen; auto-requests location on first visit |
+| Location permission rationale | Card shown above map when `shouldShowRequestPermissionRationale` is true |
+| Rating breakdown grid | Per-category scores (Security, Staff, Cleanliness, Value, Location, Fun, Facilities) |
+| Guest reviews section | Shimmer skeleton during load; avatar initials + comment body per review |
+| Active deals display | Deal badges (e.g. "10% MOBILE", "15% CUSTOM") with original vs. discounted price |
+| Property badges | Featured, New, Very Popular, HW Recommends indicators |
+| Coming soon snackbars | Avatar and notifications buttons emit `ShowComingSoon` via MVI event |
+| Shimmer skeleton on loading | Extends to home app bar, bottom action bar, detail header, comments section |
+| Search disabled during init | `GeneralAppBar` search field and click disabled while `HomeState.Initializing` |
+| SQLCipher encrypted database | Room database encrypted at rest with an Android Keystore-backed passphrase |
+| Secure backup rules | `backup_rules.xml` and `data_extraction_rules.xml` exclude database, DataStore, and SharedPreferences |
+| Certificate pinning | OkHttp `CertificatePinner` applied in non-debug builds |
+| Firebase Crashlytics | `CrashlyticsInitializer` installed in non-debug builds |
+| Firebase Analytics | `FirebaseAnalyticsRepository` maps each `AnalyticsEvent` to Firebase events |
+| CI/CD pipeline | GitHub Actions: ktlint + detekt + tests + Kover on every PR; signed AAB on `main` |
+| App Links / deep links | `https://stayscout.com/property/{propertyId}` wired end-to-end |
+| HTML overview rendering | `HtmlCompat.fromHtml` strips HTML tags from the overview body |
+| Chucker (debug / QA) | In-app HTTP inspector; no-op in release builds |
+| Showkase component browser | All reusable components browsable in a debug catalogue |
+| ktlint + Compose Rules | Formatting enforced with Compose-specific rule set |
 | detekt static analysis | Custom config with Compose rule integration |
 | Kover coverage gate | 90%+ line coverage required on every changed file |
-| Pre-commit hooks | Branch name, commit message, format, lint, test, coverage all enforced locally |
-| Multi-variant build config | `debug`, `qa`, and `release` variants with separate base URLs and app names |
-| Unit test suite | ~90 tests across all modules (mappers, serializers, repositories, ViewModels, state) |
-| Compose Multipreview | `@PreviewThemes` annotation for light + dark preview in one annotation |
+| Pre-commit hooks | Branch name, commit message, format, lint, test, coverage — all enforced locally |
+| Multi-variant build config | `debug`, `qa` (minified), and `release` variants with separate base URLs and app names |
+| Unit test suite | 90+ tests across mappers, serializers, repositories, ViewModels, and state machines |
+| Compose Multipreview | `@PreviewThemes` annotation covers light + dark in one declaration |
 
 ---
 
 ## Planned Features
 
-These are intentionally not yet implemented and will be added in future iterations:
-
 | Feature | Notes |
 |---|---|
-| Image gallery carousel | The API response includes `imageGallery`; a swipeable full-screen gallery is planned |
 | Booking / reservation flow | A complete booking flow with availability check |
-| Map view | Property locations on an interactive map |
 | Favourites | Locally saved favourite properties with Room |
 | Filter and sort | Filter by type, rating range, price range; sort by price / rating |
 | Share property | Deep-link share via Android `ShareSheet` |
-| Instrumented / UI tests | Compose UI tests with Espresso and `createAndroidComposeRule` |
-| CI/CD pipeline | GitHub Actions workflow for pull request checks |
-| Accessibility audit | TalkBack + screen reader support; content descriptions review |
-| Analytics | Replace fire-and-forget stats with a proper analytics SDK |
+| Instrumented / UI tests | Compose UI tests with `createAndroidComposeRule` |
+| Accessibility audit | TalkBack + screen reader; content descriptions review |
 | Pagination from API | Currently the API returns all properties at once; move to server-side pagination when available |

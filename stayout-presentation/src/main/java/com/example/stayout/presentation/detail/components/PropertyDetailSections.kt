@@ -14,7 +14,10 @@ import com.example.stayout.presentation.components.SectionDivider
 import com.example.stayout.presentation.detail.PropertyDetailIntent
 import com.example.stayout.presentation.detail.PropertyDetailState
 import com.example.stayout.presentation.detail.comments.CommentsSection
+import com.example.stayout.presentation.preview.PreviewData
 import com.example.stayout.presentation.theme.Dimens
+import com.example.stayout.presentation.theme.PreviewThemes
+import com.example.stayout.presentation.theme.StayScoutTheme
 
 @Composable
 internal fun PropertyDetailSections(
@@ -100,3 +103,38 @@ internal fun PropertyDetailSections(
         }
     }
 }
+
+// region Previews
+
+@PreviewThemes
+@Composable
+private fun PropertyDetailSectionsPreview() {
+    StayScoutTheme {
+        PropertyDetailSections(
+            state =
+                PropertyDetailState.Success(
+                    property = PreviewData.previewProperty,
+                    rates = PreviewData.previewRates,
+                ),
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewThemes
+@Composable
+private fun PropertyDetailSectionsOfflinePreview() {
+    StayScoutTheme {
+        PropertyDetailSections(
+            state =
+                PropertyDetailState.Success(
+                    property = PreviewData.previewProperty,
+                    rates = PreviewData.previewRates,
+                    isOffline = true,
+                ),
+            onIntent = {},
+        )
+    }
+}
+
+// endregion

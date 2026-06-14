@@ -1,10 +1,12 @@
 package com.example.stayout.presentation.model
 
+import androidx.compose.runtime.Immutable
 import com.example.stayout.domain.model.CurrencyDomainModel
 import com.example.stayout.domain.model.ExchangeRatesDomainModel
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+@Immutable
 data class PropertyUiModel(
     val id: Int,
     val name: String,

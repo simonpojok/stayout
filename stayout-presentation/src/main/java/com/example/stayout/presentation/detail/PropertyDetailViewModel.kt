@@ -2,10 +2,14 @@ package com.example.stayout.presentation.detail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.example.stayout.domain.model.AnalyticsEvent
 import com.example.stayout.domain.model.ExchangeRatesDomainModel
+import com.example.stayout.domain.model.InternetConnectionError
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.usecase.GetExchangeRatesUseCase
 import com.example.stayout.domain.usecase.GetPropertyByIdUseCase
 import com.example.stayout.domain.usecase.ObserveNetworkStatusUseCase
+import com.example.stayout.domain.usecase.TrackEventUseCase
 import com.example.stayout.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -22,6 +26,7 @@ class PropertyDetailViewModel
         private val getPropertyByIdUseCase: GetPropertyByIdUseCase,
         private val getExchangeRatesUseCase: GetExchangeRatesUseCase,
         private val observeNetworkStatusUseCase: ObserveNetworkStatusUseCase,
+        private val trackEventUseCase: TrackEventUseCase,
         savedStateHandle: SavedStateHandle,
     ) : BaseViewModel<PropertyDetailState, PropertyDetailIntent, PropertyDetailEvent>(
             initialState = PropertyDetailState.Loading,
@@ -34,19 +39,25 @@ class PropertyDetailViewModel
         init {
             loadData()
             observeNetworkStatus()
+            track(AnalyticsEvent.ScreenViewed("property_detail"))
         }
 
         override fun onIntent(intent: PropertyDetailIntent) {
             when (intent) {
-                is PropertyDetailIntent.SelectCurrency ->
+                is PropertyDetailIntent.SelectCurrency -> {
+                    val previous = (currentState as? PropertyDetailState.Success)?.selectedCurrency
                     updateState {
                         (this as? PropertyDetailState.Success)?.copy(selectedCurrency = intent.currency) ?: this
                     }
+                    if (previous != null && previous != intent.currency) {
+                        track(AnalyticsEvent.CurrencyChanged(previous.name, intent.currency.name))
+                    }
+                }
                 PropertyDetailIntent.Retry -> loadData()
-                PropertyDetailIntent.Book -> Unit
-                PropertyDetailIntent.Share -> Unit
-                PropertyDetailIntent.Favorite -> Unit
-                PropertyDetailIntent.Location -> Unit
+                PropertyDetailIntent.Book -> emitEvent(PropertyDetailEvent.ShowComingSoon("Booking"))
+                PropertyDetailIntent.Share -> emitEvent(PropertyDetailEvent.ShowComingSoon("Share"))
+                PropertyDetailIntent.Favorite -> emitEvent(PropertyDetailEvent.ShowComingSoon("Save to favourites"))
+                PropertyDetailIntent.Location -> emitEvent(PropertyDetailEvent.ShowComingSoon("Directions"))
             }
         }
 
@@ -68,28 +79,38 @@ class PropertyDetailViewModel
                 val propertyDeferred = async { getPropertyByIdUseCase(propertyId) }
                 val ratesDeferred = async { getExchangeRatesUseCase() }
 
-                val property = propertyDeferred.await()
+                val propertyResult = propertyDeferred.await()
                 val ratesResult = ratesDeferred.await()
 
-                if (property == null) {
-                    updateState { PropertyDetailState.Error("Property not found") }
-                    return@launch
-                }
+                propertyResult
+                    .onSuccess { property ->
+                        if (property == null) {
+                            updateState { PropertyDetailState.Error(InternetConnectionError.NotFound) }
+                            return@launch
+                        }
 
-                val rates =
-                    ratesResult.getOrNull() ?: ExchangeRatesDomainModel(
-                        usd = BigDecimal.ONE,
-                        gbp = BigDecimal.ONE,
-                    )
+                        val rates =
+                            ratesResult.getOrNull() ?: ExchangeRatesDomainModel(
+                                usd = BigDecimal.ONE,
+                                gbp = BigDecimal.ONE,
+                            )
 
-                updateState {
-                    PropertyDetailState.Success(
-                        property = property,
-                        rates = rates,
-                        ratesUnavailable = ratesResult.isFailure,
-                    )
-                }
+                        updateState {
+                            PropertyDetailState.Success(
+                                property = property,
+                                rates = rates,
+                                ratesUnavailable = ratesResult.isFailure,
+                            )
+                        }
+                    }.onFailure { e ->
+                        val error = (e as? InternetConnectionException)?.error ?: InternetConnectionError.Unknown
+                        updateState { PropertyDetailState.Error(error) }
+                    }
             }
+        }
+
+        private fun track(event: AnalyticsEvent) {
+            viewModelScope.launch { trackEventUseCase(event) }
         }
 
         companion object {

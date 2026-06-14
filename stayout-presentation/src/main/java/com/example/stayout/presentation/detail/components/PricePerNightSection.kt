@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import com.example.stayout.domain.model.CurrencyDomainModel
 import com.example.stayout.domain.model.ExchangeRatesDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
@@ -34,6 +36,7 @@ internal fun PricePerNightSection(
         Text(
             text = stringResource(R.string.label_price_per_night),
             style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() },
         )
         Spacer(modifier = Modifier.height(Dimens.spacing10))
         if (property.promotions.isNotEmpty()) {

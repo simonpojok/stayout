@@ -36,6 +36,12 @@ composeRules = "0.6.0"
 kover = "0.9.8"
 osmdroid = "6.1.18"
 showkase = "1.0.4"
+timber = "5.0.1"
+leakcanary = "2.14"
+datastore = "1.1.1"
+firebase-bom = "33.15.0"
+google-services = "4.4.2"
+firebase-crashlytics-plugin = "3.0.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -91,6 +97,12 @@ kotlinx-coroutines-rx3 = { group = "org.jetbrains.kotlinx", name = "kotlinx-coro
 showkase-browser = { module = "com.airbnb.android:showkase", version.ref = "showkase" }
 showkase-annotation = { module = "com.airbnb.android:showkase-annotation", version.ref = "showkase" }
 showkase-processor = { module = "com.airbnb.android:showkase-processor", version.ref = "showkase" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+leakcanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -103,3 +115,5 @@ jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrai
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradle" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebase-crashlytics-plugin = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-plugin" }

@@ -1,21 +1,27 @@
 package com.example.stayout.presentation.detail
 
 import androidx.lifecycle.SavedStateHandle
+import com.example.stayout.domain.model.AnalyticsEvent
 import com.example.stayout.domain.model.CurrencyDomainModel
 import com.example.stayout.domain.model.ExchangeRatesDomainModel
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
 import com.example.stayout.domain.model.FacilityDomainModel
+import com.example.stayout.domain.model.InternetConnectionError
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.usecase.GetExchangeRatesUseCase
 import com.example.stayout.domain.usecase.GetPropertyByIdUseCase
 import com.example.stayout.domain.usecase.ObserveNetworkStatusUseCase
+import com.example.stayout.domain.usecase.TrackEventUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -32,6 +38,7 @@ class PropertyDetailViewModelTest {
     private val getPropertyByIdUseCase: GetPropertyByIdUseCase = mockk()
     private val getExchangeRatesUseCase: GetExchangeRatesUseCase = mockk()
     private val observeNetworkStatusUseCase: ObserveNetworkStatusUseCase = mockk()
+    private val trackEventUseCase: TrackEventUseCase = mockk(relaxed = true)
 
     private val propertyId = 42
     private val savedStateHandle =
@@ -75,22 +82,25 @@ class PropertyDetailViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        coEvery { getPropertyByIdUseCase(propertyId) } returns property
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(property)
         coEvery { getExchangeRatesUseCase() } returns Result.success(rates)
         coEvery { observeNetworkStatusUseCase() } returns flowOf(true)
-        viewModel =
-            PropertyDetailViewModel(
-                getPropertyByIdUseCase,
-                getExchangeRatesUseCase,
-                observeNetworkStatusUseCase,
-                savedStateHandle,
-            )
+        viewModel = createViewModel()
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
     }
+
+    private fun createViewModel() =
+        PropertyDetailViewModel(
+            getPropertyByIdUseCase,
+            getExchangeRatesUseCase,
+            observeNetworkStatusUseCase,
+            trackEventUseCase,
+            savedStateHandle,
+        )
 
     @Test
     fun `initial load transitions to Success state with property and rates`() {
@@ -106,32 +116,34 @@ class PropertyDetailViewModelTest {
 
     @Test
     fun `load shows Error when property is not found`() {
-        coEvery { getPropertyByIdUseCase(propertyId) } returns null
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(null)
 
-        val vm =
-            PropertyDetailViewModel(
-                getPropertyByIdUseCase,
-                getExchangeRatesUseCase,
-                observeNetworkStatusUseCase,
-                savedStateHandle,
-            )
+        val vm = createViewModel()
         val state = vm.state.value
 
         assertTrue(state is PropertyDetailState.Error)
-        assertEquals("Property not found", (state as PropertyDetailState.Error).message)
+        assertEquals(InternetConnectionError.NotFound, (state as PropertyDetailState.Error).error)
+    }
+
+    @Test
+    fun `load shows Error when getPropertyByIdUseCase fails`() {
+        coEvery { getPropertyByIdUseCase(propertyId) } returns
+            Result.failure(
+                InternetConnectionException(InternetConnectionError.NoConnection, RuntimeException("Network error")),
+            )
+
+        val vm = createViewModel()
+        val state = vm.state.value
+
+        assertTrue(state is PropertyDetailState.Error)
+        assertEquals(InternetConnectionError.NoConnection, (state as PropertyDetailState.Error).error)
     }
 
     @Test
     fun `load succeeds with fallback rates when rates fetch fails`() {
         coEvery { getExchangeRatesUseCase() } returns Result.failure(RuntimeException("No rates"))
 
-        val vm =
-            PropertyDetailViewModel(
-                getPropertyByIdUseCase,
-                getExchangeRatesUseCase,
-                observeNetworkStatusUseCase,
-                savedStateHandle,
-            )
+        val vm = createViewModel()
         val state = vm.state.value as PropertyDetailState.Success
 
         assertEquals(property, state.property)
@@ -157,18 +169,22 @@ class PropertyDetailViewModelTest {
     }
 
     @Test
+    fun `SelectCurrency emits CurrencyChanged analytics event`() =
+        runTest(testDispatcher) {
+            viewModel.onIntent(PropertyDetailIntent.SelectCurrency(CurrencyDomainModel.USD))
+
+            io.mockk.coVerify {
+                trackEventUseCase(AnalyticsEvent.CurrencyChanged("EUR", "USD"))
+            }
+        }
+
+    @Test
     fun `Retry reloads data after an error`() {
-        coEvery { getPropertyByIdUseCase(propertyId) } returns null
-        val vm =
-            PropertyDetailViewModel(
-                getPropertyByIdUseCase,
-                getExchangeRatesUseCase,
-                observeNetworkStatusUseCase,
-                savedStateHandle,
-            )
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(null)
+        val vm = createViewModel()
         assertTrue(vm.state.value is PropertyDetailState.Error)
 
-        coEvery { getPropertyByIdUseCase(propertyId) } returns property
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(property)
         vm.onIntent(PropertyDetailIntent.Retry)
 
         assertTrue(vm.state.value is PropertyDetailState.Success)
@@ -178,16 +194,19 @@ class PropertyDetailViewModelTest {
     fun `network offline status reflects in Success state`() {
         coEvery { observeNetworkStatusUseCase() } returns flowOf(false)
 
-        val vm =
-            PropertyDetailViewModel(
-                getPropertyByIdUseCase,
-                getExchangeRatesUseCase,
-                observeNetworkStatusUseCase,
-                savedStateHandle,
-            )
+        val vm = createViewModel()
         val state = vm.state.value as PropertyDetailState.Success
         assertTrue(state.isOffline)
     }
+
+    @Test
+    fun `Book intent emits ShowComingSoon event`() =
+        runTest(testDispatcher) {
+            viewModel.onIntent(PropertyDetailIntent.Book)
+
+            val event = viewModel.events.first()
+            assertTrue(event is PropertyDetailEvent.ShowComingSoon)
+        }
 
     @Test
     fun `Book intent does not change state`() {
@@ -227,14 +246,8 @@ class PropertyDetailViewModelTest {
 
     @Test
     fun `SelectCurrency is ignored when state is not Success`() {
-        coEvery { getPropertyByIdUseCase(propertyId) } returns null
-        val vm =
-            PropertyDetailViewModel(
-                getPropertyByIdUseCase,
-                getExchangeRatesUseCase,
-                observeNetworkStatusUseCase,
-                savedStateHandle,
-            )
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(null)
+        val vm = createViewModel()
         assertTrue(vm.state.value is PropertyDetailState.Error)
 
         vm.onIntent(PropertyDetailIntent.SelectCurrency(CurrencyDomainModel.USD))

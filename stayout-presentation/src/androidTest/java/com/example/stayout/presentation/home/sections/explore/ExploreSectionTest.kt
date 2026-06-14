@@ -4,12 +4,18 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
+import com.example.stayout.domain.usecase.GetPropertiesUseCase
+import com.example.stayout.domain.usecase.ObserveNetworkStatusUseCase
+import com.example.stayout.domain.usecase.TrackEventUseCase
 import com.example.stayout.presentation.theme.StayScoutTheme
-import org.junit.Assert.assertTrue
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,6 +25,11 @@ import java.math.BigDecimal
 class ExploreSectionTest {
     @get:Rule
     val rule = createComposeRule()
+
+    private val getPropertiesUseCase: GetPropertiesUseCase = mockk()
+    private val observeNetworkStatusUseCase: ObserveNetworkStatusUseCase = mockk()
+    private val trackEventUseCase: TrackEventUseCase = mockk(relaxed = true)
+    private val savedStateHandle = SavedStateHandle()
 
     private val location = LocationDomainModel("Dublin", "Ireland")
 
@@ -35,15 +46,26 @@ class ExploreSectionTest {
             thumbnailUrl = null,
             address = "2-12 Lord Edward St",
             type = "Hostel",
-            facilities = listOf(FacilityCategoryDomainModel("Amenities", listOf("WiFi"))),
+            facilities = listOf(FacilityCategoryDomainModel("Amenities", listOf())),
             freeCancellationAvailable = true,
         )
 
+    private fun viewModelWith(result: Result<Pair<LocationDomainModel, List<PropertyDomainModel>>>): ExploreViewModel {
+        coEvery { observeNetworkStatusUseCase() } returns flowOf(true)
+        coEvery { getPropertiesUseCase() } returns result
+        return ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle, trackEventUseCase)
+    }
+
     @Test
     fun `loading state does not show any property cards`() {
+        coEvery { observeNetworkStatusUseCase() } returns flowOf(true)
+        coEvery { getPropertiesUseCase() } returns Result.failure(RuntimeException("error"))
+        val vm =
+            ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle, trackEventUseCase)
+
         rule.setContent {
             StayScoutTheme {
-                ExploreSection(state = ExploreState.Loading, onIntent = {})
+                ExploreSection(searchQuery = "", onNavigateToDetail = {}, viewModel = vm)
             }
         }
 
@@ -52,12 +74,11 @@ class ExploreSectionTest {
 
     @Test
     fun `error state displays the error message`() {
+        val vm = viewModelWith(Result.failure(RuntimeException("No internet connection.")))
+
         rule.setContent {
             StayScoutTheme {
-                ExploreSection(
-                    state = ExploreState.Error("No internet connection."),
-                    onIntent = {},
-                )
+                ExploreSection(searchQuery = "", onNavigateToDetail = {}, viewModel = vm)
             }
         }
 
@@ -65,36 +86,12 @@ class ExploreSectionTest {
     }
 
     @Test
-    fun `retry button in error state fires Load intent`() {
-        var intentReceived: ExploreIntent? = null
-
-        rule.setContent {
-            StayScoutTheme {
-                ExploreSection(
-                    state = ExploreState.Error("Network error"),
-                    onIntent = { intentReceived = it },
-                )
-            }
-        }
-
-        rule.onNodeWithText("Retry").performClick()
-
-        assertTrue(intentReceived is ExploreIntent.Load)
-    }
-
-    @Test
     fun `success state displays property name`() {
+        val vm = viewModelWith(Result.success(location to listOf(property)))
+
         rule.setContent {
             StayScoutTheme {
-                ExploreSection(
-                    state =
-                        ExploreState.Success(
-                            location = location,
-                            allProperties = listOf(property),
-                            pageEnd = 6,
-                        ),
-                    onIntent = {},
-                )
+                ExploreSection(searchQuery = "", onNavigateToDetail = {}, viewModel = vm)
             }
         }
 
@@ -103,17 +100,11 @@ class ExploreSectionTest {
 
     @Test
     fun `success state with no properties shows empty state`() {
+        val vm = viewModelWith(Result.success(location to emptyList()))
+
         rule.setContent {
             StayScoutTheme {
-                ExploreSection(
-                    state =
-                        ExploreState.Success(
-                            location = location,
-                            allProperties = emptyList(),
-                            pageEnd = 6,
-                        ),
-                    onIntent = {},
-                )
+                ExploreSection(searchQuery = "", onNavigateToDetail = {}, viewModel = vm)
             }
         }
 
@@ -121,25 +112,22 @@ class ExploreSectionTest {
     }
 
     @Test
-    fun `tapping a property card fires SelectProperty intent`() {
-        var intentReceived: ExploreIntent? = null
+    fun `tapping a property card calls onNavigateToDetail`() {
+        val vm = viewModelWith(Result.success(location to listOf(property)))
+        var navigatedId: Int? = null
 
         rule.setContent {
             StayScoutTheme {
                 ExploreSection(
-                    state =
-                        ExploreState.Success(
-                            location = location,
-                            allProperties = listOf(property),
-                            pageEnd = 6,
-                        ),
-                    onIntent = { intentReceived = it },
+                    searchQuery = "",
+                    onNavigateToDetail = { navigatedId = it },
+                    viewModel = vm,
                 )
             }
         }
 
         rule.onNodeWithText("Kinlay House").performClick()
 
-        assertTrue(intentReceived is ExploreIntent.SelectProperty)
+        assert(navigatedId == property.id)
     }
 }

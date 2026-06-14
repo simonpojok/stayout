@@ -2,6 +2,7 @@ package com.example.stayout.presentation.detail
 
 import com.example.stayout.domain.model.CurrencyDomainModel
 import com.example.stayout.domain.model.ExchangeRatesDomainModel
+import com.example.stayout.domain.model.InternetConnectionError
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.presentation.base.BaseState
 
@@ -17,6 +18,6 @@ sealed interface PropertyDetailState : BaseState {
     ) : PropertyDetailState
 
     data class Error(
-        val message: String,
+        val error: InternetConnectionError,
     ) : PropertyDetailState
 }

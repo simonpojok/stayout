@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
+import okhttp3.CertificatePinner
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -67,6 +68,18 @@ object NetworkModule {
                 if (isDebug) {
                     builder.addInterceptor(
                         HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY },
+                    )
+                } else {
+                    // Replace placeholder hashes with real SHA-256 pins from your production cert:
+                    // openssl s_client -connect <your-api-host>:443 </dev/null |
+                    //   openssl x509 -pubkey -noout | openssl pkey -pubin -outform DER |
+                    //   openssl dgst -sha256 -binary | base64
+                    builder.certificatePinner(
+                        CertificatePinner
+                            .Builder()
+                            .add("api.yourdomain.com", "sha256/REPLACE_WITH_LEAF_CERT_PIN=")
+                            .add("api.yourdomain.com", "sha256/REPLACE_WITH_BACKUP_CERT_PIN=")
+                            .build(),
                     )
                 }
             }.addInterceptor(chuckerInterceptor)

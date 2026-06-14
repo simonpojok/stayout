@@ -9,11 +9,14 @@ import com.example.stayout.data.local.mapper.LocationEntityToDomainMapper
 import com.example.stayout.data.local.mapper.PropertyDomainToEntityMapper
 import com.example.stayout.data.local.mapper.PropertyEntityToDomainMapper
 import com.example.stayout.data.mapper.PropertiesResponseToDomainMapper
+import com.example.stayout.data.mapper.ThrowableToInternetConnectionErrorMapper
 import com.example.stayout.data.remote.api.PropertyApi
 import com.example.stayout.data.remote.model.CityDataModel
 import com.example.stayout.data.remote.model.LocationDataModel
 import com.example.stayout.data.remote.model.PropertiesResponseDataModel
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
+import com.example.stayout.domain.model.InternetConnectionError
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.repository.StatsEvent
@@ -39,6 +42,7 @@ class PropertyRepositoryImplTest {
     private val propertyDomainToEntity = mockk<PropertyDomainToEntityMapper>()
     private val locationEntityToDomain = mockk<LocationEntityToDomainMapper>()
     private val locationDomainToEntity = mockk<LocationDomainToEntityMapper>()
+    private val throwableToInternetConnectionError = mockk<ThrowableToInternetConnectionErrorMapper>()
 
     private val repository =
         PropertyRepositoryImpl(
@@ -51,6 +55,7 @@ class PropertyRepositoryImplTest {
             propertyDomainToEntity = propertyDomainToEntity,
             locationEntityToDomain = locationEntityToDomain,
             locationDomainToEntity = locationDomainToEntity,
+            throwableToInternetConnectionError = throwableToInternetConnectionError,
         )
 
     private val stubResponse =
@@ -143,11 +148,15 @@ class PropertyRepositoryImplTest {
         runTest {
             val exception = RuntimeException("Network error")
             coEvery { api.getProperties() } throws exception
+            every { throwableToInternetConnectionError.map(exception) } returns InternetConnectionError.Unknown
 
             val result = repository.getProperties()
 
             assertTrue(result.isFailure)
-            assertEquals(exception, result.exceptionOrNull())
+            val failure = result.exceptionOrNull()
+            assertTrue(failure is InternetConnectionException)
+            assertEquals(InternetConnectionError.Unknown, (failure as InternetConnectionException).error)
+            assertEquals(exception, failure.cause)
         }
 
     @Test
@@ -173,9 +182,60 @@ class PropertyRepositoryImplTest {
     fun `does not track stats event when API throws`() =
         runTest {
             coEvery { api.getProperties() } throws RuntimeException("error")
+            every { throwableToInternetConnectionError.map(any()) } returns InternetConnectionError.Unknown
 
             repository.getProperties()
 
             verify(exactly = 0) { statsRepository.trackEvent(any(), any()) }
+        }
+
+    @Test
+    fun `getPropertyById returns the property matching the given id`() =
+        runTest {
+            coEvery { api.getProperties() } returns stubResponse
+            every { mapper.map(stubResponse) } returns stubResult
+
+            val result = repository.getPropertyById(1)
+
+            assertTrue(result.isSuccess)
+            assertEquals(stubProperty, result.getOrNull())
+        }
+
+    @Test
+    fun `getPropertyById returns null when no property matches`() =
+        runTest {
+            coEvery { api.getProperties() } returns stubResponse
+            every { mapper.map(stubResponse) } returns stubResult
+
+            val result = repository.getPropertyById(99)
+
+            assertTrue(result.isSuccess)
+            org.junit.Assert.assertNull(result.getOrNull())
+        }
+
+    @Test
+    fun `getPropertyById returns failure when getProperties fails`() =
+        runTest {
+            val exception = RuntimeException("Network error")
+            coEvery { api.getProperties() } throws exception
+            every { throwableToInternetConnectionError.map(exception) } returns InternetConnectionError.NoConnection
+
+            val result = repository.getPropertyById(1)
+
+            assertTrue(result.isFailure)
+            val failure = result.exceptionOrNull()
+            assertTrue(failure is InternetConnectionException)
+            assertEquals(InternetConnectionError.NoConnection, (failure as InternetConnectionException).error)
+        }
+
+    @Test
+    fun `getPropertyById tracks LOAD_DETAILS stats event`() =
+        runTest {
+            coEvery { api.getProperties() } returns stubResponse
+            every { mapper.map(stubResponse) } returns stubResult
+
+            repository.getPropertyById(1)
+
+            verify { statsRepository.trackEvent(StatsEvent.LOAD_DETAILS, any()) }
         }
 }

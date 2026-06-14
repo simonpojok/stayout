@@ -3,8 +3,12 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    // TODO: uncomment after adding google-services.json to app/:
+    // alias(libs.plugins.google.services)
+    // alias(libs.plugins.firebase.crashlytics.plugin)
 }
 
 fun loadProperties(filePath: String): Properties =
@@ -16,6 +20,8 @@ fun loadProperties(filePath: String): Properties =
             ?.use { load(it) }
     }
 
+val keystoreProps = loadProperties("config/keystore.properties")
+
 android {
     namespace = "com.example.stayscout"
     compileSdk {
@@ -23,6 +29,18 @@ android {
             release(36) {
                 minorApiLevel = 1
             }
+    }
+
+    signingConfigs {
+        create("release") {
+            val keyFile = System.getenv("KEYSTORE_FILE_PATH") ?: keystoreProps["storeFile"] as String?
+            if (keyFile != null) {
+                storeFile = file(keyFile)
+                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: keystoreProps["storePassword"] as String
+                keyAlias = System.getenv("KEY_ALIAS") ?: keystoreProps["keyAlias"] as String
+                keyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProps["keyPassword"] as String
+            }
+        }
     }
 
     defaultConfig {
@@ -60,7 +78,8 @@ android {
             applicationIdSuffix = ".qa"
             versionNameSuffix = "-QA"
             isDebuggable = false
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
             buildConfigField("String", "JSON_PLACEHOLDER_BASE_URL", "\"${props["JSON_PLACEHOLDER_BASE_URL"]}\"")
             resValue("string", "app_name", "StayScout QA")
@@ -71,6 +90,9 @@ android {
         release {
             val props = loadProperties("config/release.properties")
             isMinifyEnabled = true
+            signingConfigs.getByName("release").takeIf { it.storeFile != null }?.let {
+                signingConfig = it
+            }
             isShrinkResources = true
             buildConfigField("String", "BASE_URL", "\"${props["BASE_URL"]}\"")
             buildConfigField("String", "JSON_PLACEHOLDER_BASE_URL", "\"${props["JSON_PLACEHOLDER_BASE_URL"]}\"")
@@ -118,12 +140,19 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.material)
     implementation(libs.hilt.android)
     implementation(libs.osmdroid)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     ksp(libs.hilt.compiler)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.timber)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
+    debugImplementation(libs.leakcanary)
     debugImplementation(libs.showkase.browser)
     kspDebug(libs.showkase.processor)
     "qaImplementation"(libs.showkase.browser)

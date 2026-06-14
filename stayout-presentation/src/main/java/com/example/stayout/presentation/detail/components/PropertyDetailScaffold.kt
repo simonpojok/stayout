@@ -5,8 +5,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.example.stayout.domain.model.InternetConnectionError
 import com.example.stayout.presentation.components.BasicAppBar
 import com.example.stayout.presentation.components.BottomActionBar
 import com.example.stayout.presentation.components.ErrorState
@@ -17,6 +21,7 @@ import com.example.stayout.presentation.preview.PreviewData.previewProperty
 import com.example.stayout.presentation.preview.PreviewData.previewRates
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
+import com.example.stayout.presentation.util.toMessageRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,17 +29,20 @@ internal fun PropertyDetailScaffold(
     state: PropertyDetailState,
     onBack: () -> Unit,
     onIntent: (PropertyDetailIntent) -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
     val propertyName = (state as? PropertyDetailState.Success)?.property?.name ?: ""
+    val isLoading = state is PropertyDetailState.Loading
 
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         topBar = {
-            BasicAppBar(title = propertyName, onNavigateBack = onBack)
+            BasicAppBar(title = propertyName, isLoading = isLoading, onNavigateBack = onBack)
         },
         bottomBar = {
-            BottomActionBar(onIntent = onIntent, applyNavigationBarPadding = true)
+            BottomActionBar(onIntent = onIntent, isLoading = isLoading, applyNavigationBarPadding = true)
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             OfflineBanner(visible = (state as? PropertyDetailState.Success)?.isOffline == true)
@@ -42,7 +50,7 @@ internal fun PropertyDetailScaffold(
                 is PropertyDetailState.Loading -> PropertyDetailSkeleton()
                 is PropertyDetailState.Error ->
                     ErrorState(
-                        message = state.message,
+                        message = stringResource(state.error.toMessageRes()),
                         onRetry = { onIntent(PropertyDetailIntent.Retry) },
                     )
                 is PropertyDetailState.Success ->
@@ -58,7 +66,12 @@ internal fun PropertyDetailScaffold(
 @Composable
 private fun PropertyDetailSkeletonPreview() {
     StayScoutTheme {
-        PropertyDetailScaffold(state = PropertyDetailState.Loading, onBack = {}, onIntent = {})
+        PropertyDetailScaffold(
+            state = PropertyDetailState.Loading,
+            onBack = {},
+            onIntent = {},
+            snackbarHostState = SnackbarHostState(),
+        )
     }
 }
 
@@ -67,9 +80,10 @@ private fun PropertyDetailSkeletonPreview() {
 private fun PropertyDetailErrorPreview() {
     StayScoutTheme {
         PropertyDetailScaffold(
-            state = PropertyDetailState.Error("Property not found"),
+            state = PropertyDetailState.Error(InternetConnectionError.NotFound),
             onBack = {},
             onIntent = {},
+            snackbarHostState = SnackbarHostState(),
         )
     }
 }
@@ -82,6 +96,7 @@ private fun PropertyDetailSuccessPreview() {
             state = PropertyDetailState.Success(property = previewProperty, rates = previewRates),
             onBack = {},
             onIntent = {},
+            snackbarHostState = SnackbarHostState(),
         )
     }
 }
@@ -99,6 +114,7 @@ private fun PropertyDetailRatesUnavailablePreview() {
                 ),
             onBack = {},
             onIntent = {},
+            snackbarHostState = SnackbarHostState(),
         )
     }
 }

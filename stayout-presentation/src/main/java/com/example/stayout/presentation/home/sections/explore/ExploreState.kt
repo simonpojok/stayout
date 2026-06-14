@@ -1,5 +1,6 @@
 package com.example.stayout.presentation.home.sections.explore
 
+import com.example.stayout.domain.model.InternetConnectionError
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.presentation.base.BaseState
@@ -29,6 +30,6 @@ sealed interface ExploreState : BaseState {
     }
 
     data class Error(
-        val message: String,
+        val error: InternetConnectionError,
     ) : ExploreState
 }

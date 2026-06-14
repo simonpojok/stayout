@@ -51,6 +51,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    composeCompiler {
+        stabilityConfigurationFiles.add(
+            rootProject.layout.projectDirectory.file("compose_stability_config.conf"),
+        )
+    }
 }
 
 ksp {
@@ -73,6 +79,7 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.datastore.preferences)
     implementation(libs.coil.compose)
     implementation(libs.osmdroid)
     implementation(libs.kotlinx.coroutines.rx3)

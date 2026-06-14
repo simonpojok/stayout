@@ -17,8 +17,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -47,10 +48,12 @@ import com.example.stayout.presentation.theme.StayScoutTheme
 fun GeneralAppBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    isDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
+    isSearchEnabled: Boolean = true,
     onAvatarClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
-    onCallClick: () -> Unit = {},
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -94,7 +97,7 @@ fun GeneralAppBar(
                         .height(40.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable { focusRequester.requestFocus() }
+                        .then(if (isSearchEnabled) Modifier.clickable { focusRequester.requestFocus() } else Modifier)
                         .padding(horizontal = Dimens.spacing12),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Dimens.spacing8),
@@ -112,6 +115,7 @@ fun GeneralAppBar(
                         Modifier
                             .weight(1f)
                             .focusRequester(focusRequester),
+                    enabled = isSearchEnabled,
                     singleLine = true,
                     textStyle =
                         MaterialTheme.typography.bodyMedium.copy(
@@ -165,7 +169,7 @@ fun GeneralAppBar(
             }
 
             FilledIconButton(
-                onClick = onCallClick,
+                onClick = onToggleTheme,
                 shape = RoundedCornerShape(4.dp),
                 colors =
                     IconButtonDefaults.filledIconButtonColors(
@@ -174,8 +178,11 @@ fun GeneralAppBar(
                     ),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Phone,
-                    contentDescription = stringResource(R.string.cd_call),
+                    imageVector = if (isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                    contentDescription =
+                        stringResource(
+                            if (isDarkTheme) R.string.cd_switch_to_light_mode else R.string.cd_switch_to_dark_mode,
+                        ),
                 )
             }
         }
@@ -194,6 +201,8 @@ internal fun GeneralAppBarEmptyPreview() {
         GeneralAppBar(
             searchQuery = "",
             onSearchQueryChange = {},
+            isDarkTheme = false,
+            onToggleTheme = {},
         )
     }
 }
@@ -206,6 +215,8 @@ internal fun GeneralAppBarActivePreview() {
         GeneralAppBar(
             searchQuery = "Amsterdam",
             onSearchQueryChange = {},
+            isDarkTheme = true,
+            onToggleTheme = {},
         )
     }
 }

@@ -1,6 +1,6 @@
 package com.example.stayout.presentation.home.sections.saved
 
-import com.example.stayout.presentation.base.BaseViewModel
+import com.example.stayout.presentation.base.BaseNoIntentViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -8,8 +8,4 @@ import javax.inject.Inject
 class SavedViewModel
     @Inject
     constructor() :
-    BaseViewModel<SavedState, SavedIntent, SavedEvent>(
-            initialState = SavedState.Idle,
-        ) {
-        override fun onIntent(intent: SavedIntent) = Unit
-    }
+    BaseNoIntentViewModel<SavedState, SavedEvent>(initialState = SavedState.Idle)

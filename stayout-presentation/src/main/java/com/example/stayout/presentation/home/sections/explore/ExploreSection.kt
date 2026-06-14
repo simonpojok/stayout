@@ -17,44 +17,59 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.components.EmptyState
 import com.example.stayout.presentation.components.ErrorState
 import com.example.stayout.presentation.components.LoadingState
 import com.example.stayout.presentation.components.PropertyCard
 import com.example.stayout.presentation.components.loadingMoreItems
-import com.example.stayout.presentation.preview.PreviewData.previewLocation
-import com.example.stayout.presentation.preview.PreviewData.previewProperty
-import com.example.stayout.presentation.preview.PreviewData.previewPropertyNoFeature
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
+import com.example.stayout.presentation.util.toMessageRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ExploreSection(
-    state: ExploreState,
-    onIntent: (ExploreIntent) -> Unit,
-    scrollIndex: Int = 0,
-    onSaveScroll: (Int) -> Unit = {},
+    searchQuery: String,
+    onNavigateToDetail: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: ExploreViewModel = hiltViewModel(),
 ) {
-    val currentOnIntent by rememberUpdatedState(onIntent)
-    val currentOnSaveScroll by rememberUpdatedState(onSaveScroll)
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentOnNavigateToDetail by rememberUpdatedState(onNavigateToDetail)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        when (state) {
+    LaunchedEffect(searchQuery) {
+        viewModel.onIntent(ExploreIntent.UpdateSearch(searchQuery))
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is ExploreEvent.NavigateToDetail -> currentOnNavigateToDetail(event.propertyId)
+            }
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        when (val currentState = state) {
             is ExploreState.Loading -> LoadingState()
 
             is ExploreState.Error ->
                 ErrorState(
-                    message = state.message,
-                    onRetry = { onIntent(ExploreIntent.Load) },
+                    message = stringResource(currentState.error.toMessageRes()),
+                    onRetry = { viewModel.onIntent(ExploreIntent.Load) },
                 )
 
             is ExploreState.Success -> {
-                val listState = rememberLazyListState(initialFirstVisibleItemIndex = scrollIndex)
+                val listState =
+                    rememberLazyListState(
+                        initialFirstVisibleItemIndex = viewModel.scrollIndex,
+                    )
 
                 DisposableEffect(listState) {
-                    onDispose { currentOnSaveScroll(listState.firstVisibleItemIndex) }
+                    onDispose { viewModel.saveScrollPosition(listState.firstVisibleItemIndex) }
                 }
 
                 val nearEnd by remember {
@@ -69,26 +84,26 @@ internal fun ExploreSection(
                 }
 
                 LaunchedEffect(nearEnd) {
-                    if (nearEnd) currentOnIntent(ExploreIntent.LoadMore)
+                    if (nearEnd) viewModel.onIntent(ExploreIntent.LoadMore)
                 }
 
                 val pullRefreshState = rememberPullToRefreshState()
 
                 PullToRefreshBox(
-                    isRefreshing = state.isRefreshing,
-                    onRefresh = { onIntent(ExploreIntent.Refresh) },
+                    isRefreshing = currentState.isRefreshing,
+                    onRefresh = { viewModel.onIntent(ExploreIntent.Refresh) },
                     state = pullRefreshState,
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    if (state.displayedProperties.isEmpty()) {
-                        if (state.searchQuery.isNotBlank()) {
+                    if (currentState.displayedProperties.isEmpty()) {
+                        if (currentState.searchQuery.isNotBlank()) {
                             EmptyState(
                                 modifier = Modifier.fillMaxSize(),
                                 title = stringResource(R.string.empty_search_title),
                                 message =
                                     stringResource(
                                         R.string.empty_search_message,
-                                        state.searchQuery,
+                                        currentState.searchQuery,
                                     ),
                             )
                         } else {
@@ -104,15 +119,17 @@ internal fun ExploreSection(
                             modifier = Modifier.fillMaxSize(),
                         ) {
                             items(
-                                items = state.displayedProperties,
+                                items = currentState.displayedProperties,
                                 key = { it.id },
                             ) { property ->
                                 PropertyCard(
                                     property = property,
-                                    onClick = { onIntent(ExploreIntent.SelectProperty(property)) },
+                                    onClick = {
+                                        viewModel.onIntent(ExploreIntent.SelectProperty(property))
+                                    },
                                 )
                             }
-                            if (state.isLoadingMore) {
+                            if (currentState.isLoadingMore) {
                                 loadingMoreItems(count = 2)
                             }
                         }
@@ -129,7 +146,7 @@ internal fun ExploreSection(
 @Composable
 private fun ExploreSectionLoadingPreview() {
     StayScoutTheme {
-        ExploreSection(state = ExploreState.Loading, onIntent = {})
+        ExploreSection(searchQuery = "", onNavigateToDetail = {})
     }
 }
 
@@ -137,10 +154,7 @@ private fun ExploreSectionLoadingPreview() {
 @Composable
 private fun ExploreSectionErrorPreview() {
     StayScoutTheme {
-        ExploreSection(
-            state = ExploreState.Error("No internet connection."),
-            onIntent = {},
-        )
+        ExploreSection(searchQuery = "", onNavigateToDetail = {})
     }
 }
 
@@ -148,15 +162,7 @@ private fun ExploreSectionErrorPreview() {
 @Composable
 private fun ExploreSectionSuccessPreview() {
     StayScoutTheme {
-        ExploreSection(
-            state =
-                ExploreState.Success(
-                    location = previewLocation,
-                    allProperties = listOf(previewProperty, previewPropertyNoFeature),
-                    pageEnd = 6,
-                ),
-            onIntent = {},
-        )
+        ExploreSection(searchQuery = "", onNavigateToDetail = {})
     }
 }
 

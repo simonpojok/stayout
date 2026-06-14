@@ -11,9 +11,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import com.example.stayout.domain.model.RatingBreakdownDomainModel
 import com.example.stayout.presentation.R
+import com.example.stayout.presentation.preview.PreviewData
 import com.example.stayout.presentation.theme.Dimens
+import com.example.stayout.presentation.theme.PreviewThemes
+import com.example.stayout.presentation.theme.StayScoutTheme
 
 @Composable
 internal fun RatingBreakdownSection(
@@ -35,6 +40,7 @@ internal fun RatingBreakdownSection(
         Text(
             text = stringResource(R.string.label_rating_breakdown),
             style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() },
         )
         if (breakdown.ratingsCount > 0) {
             Text(
@@ -67,3 +73,35 @@ internal fun RatingBreakdownSection(
         }
     }
 }
+
+// region Previews
+
+@PreviewThemes
+@Composable
+private fun RatingBreakdownSectionPreview() {
+    StayScoutTheme {
+        RatingBreakdownSection(breakdown = PreviewData.previewProperty.ratingBreakdown!!)
+    }
+}
+
+@PreviewThemes
+@Composable
+private fun RatingBreakdownSectionNoReviewsPreview() {
+    StayScoutTheme {
+        RatingBreakdownSection(
+            breakdown =
+                RatingBreakdownDomainModel(
+                    security = 7.0,
+                    location = 8.0,
+                    staff = 7.5,
+                    funScore = 6.5,
+                    cleanliness = 8.5,
+                    facilities = 7.0,
+                    value = 7.8,
+                    ratingsCount = 0,
+                ),
+        )
+    }
+}
+
+// endregion

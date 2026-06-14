@@ -1,5 +1,10 @@
 package com.example.stayout.presentation.components
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +25,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -35,10 +41,20 @@ import com.example.stayout.presentation.theme.StayScoutTheme
 fun BasicAppBar(
     title: String,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
     onNavigateBack: (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
     showDivider: Boolean = true,
 ) {
+    val transition = rememberInfiniteTransition(label = "appBarShimmer")
+    val alpha by transition.animateFloat(
+        initialValue = 0.25f,
+        targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(animation = tween(durationMillis = 900), repeatMode = RepeatMode.Reverse),
+        label = "appBarShimmerAlpha",
+    )
+    val shimmer = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+
     Column(
         modifier =
             modifier
@@ -55,41 +71,56 @@ fun BasicAppBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Box(
-                modifier = Modifier.size(40.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (onNavigateBack != null) {
-                    FilledIconButton(
-                        onClick = onNavigateBack,
-                        shape = RoundedCornerShape(4.dp),
-                        colors =
-                            IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                            ),
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back),
-                        )
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.size(40.dp).background(shimmer, RoundedCornerShape(4.dp)),
+                )
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .height(Dimens.spacing20)
+                            .padding(horizontal = Dimens.spacing16)
+                            .background(shimmer, MaterialTheme.shapes.extraSmall),
+                )
+                Box(modifier = Modifier.size(40.dp))
+            } else {
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (onNavigateBack != null) {
+                        FilledIconButton(
+                            onClick = onNavigateBack,
+                            shape = RoundedCornerShape(4.dp),
+                            colors =
+                                IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = MaterialTheme.colorScheme.onSurface,
+                                ),
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.cd_back),
+                            )
+                        }
                     }
                 }
-            }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f),
-            )
-            Box(
-                modifier = Modifier.size(40.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                trailingContent?.invoke()
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f),
+                )
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    trailingContent?.invoke()
+                }
             }
         }
         if (showDivider) {

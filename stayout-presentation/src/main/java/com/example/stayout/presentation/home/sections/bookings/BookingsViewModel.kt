@@ -1,6 +1,6 @@
 package com.example.stayout.presentation.home.sections.bookings
 
-import com.example.stayout.presentation.base.BaseViewModel
+import com.example.stayout.presentation.base.BaseNoIntentViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -8,8 +8,4 @@ import javax.inject.Inject
 class BookingsViewModel
     @Inject
     constructor() :
-    BaseViewModel<BookingsState, BookingsIntent, BookingsEvent>(
-            initialState = BookingsState.Idle,
-        ) {
-        override fun onIntent(intent: BookingsIntent) = Unit
-    }
+    BaseNoIntentViewModel<BookingsState, BookingsEvent>(initialState = BookingsState.Idle)

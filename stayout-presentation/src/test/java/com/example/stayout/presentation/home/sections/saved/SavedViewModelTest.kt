@@ -30,11 +30,4 @@ class SavedViewModelTest {
     fun `initial state is Idle`() {
         assertEquals(SavedState.Idle, viewModel.state.value)
     }
-
-    @Test
-    fun `onIntent does not change state`() {
-        viewModel.onIntent(SavedIntent.None)
-
-        assertEquals(SavedState.Idle, viewModel.state.value)
-    }
 }
