@@ -3,6 +3,8 @@ package com.example.stayout.presentation.home.sections.explore
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.stayout.domain.model.AnalyticsEvent
+import com.example.stayout.domain.model.InternetConnectionError
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.usecase.GetPropertiesUseCase
 import com.example.stayout.domain.usecase.ObserveNetworkStatusUseCase
 import com.example.stayout.domain.usecase.TrackEventUseCase
@@ -86,7 +88,8 @@ class ExploreViewModel
                             )
                         }
                     }.onFailure { e ->
-                        updateState { ExploreState.Error(e.message ?: "Failed to load properties") }
+                        val error = (e as? InternetConnectionException)?.error ?: InternetConnectionError.Unknown
+                        updateState { ExploreState.Error(error) }
                     }
             }
         }

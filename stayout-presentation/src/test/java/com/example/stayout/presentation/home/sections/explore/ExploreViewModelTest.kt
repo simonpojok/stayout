@@ -3,6 +3,8 @@ package com.example.stayout.presentation.home.sections.explore
 import androidx.lifecycle.SavedStateHandle
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
 import com.example.stayout.domain.model.FacilityDomainModel
+import com.example.stayout.domain.model.InternetConnectionError
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.usecase.GetPropertiesUseCase
@@ -91,13 +93,16 @@ class ExploreViewModelTest {
 
     @Test
     fun `load failure transitions to Error state`() {
-        coEvery { getPropertiesUseCase() } returns Result.failure(RuntimeException("Network error"))
+        coEvery { getPropertiesUseCase() } returns
+            Result.failure(
+                InternetConnectionException(InternetConnectionError.NoConnection, RuntimeException("Network error")),
+            )
 
         val failingVm = createViewModel()
         val state = failingVm.state.value
 
         assertTrue(state is ExploreState.Error)
-        assertEquals("Network error", (state as ExploreState.Error).message)
+        assertEquals(InternetConnectionError.NoConnection, (state as ExploreState.Error).error)
     }
 
     @Test

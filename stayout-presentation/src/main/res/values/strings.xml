@@ -3,6 +3,10 @@
     <!-- Error state -->
     <string name="error_title">Something went wrong</string>
     <string name="error_retry">Retry</string>
+    <string name="error_no_connection">No internet connection. Check your network and try again.</string>
+    <string name="error_server_unreachable">We can\'t reach our servers right now. Please try again in a moment.</string>
+    <string name="error_not_found">We couldn\'t find what you\'re looking for.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
 
     <!-- Empty state -->
     <string name="empty_search_title">No matches found</string>

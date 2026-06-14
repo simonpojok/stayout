@@ -7,6 +7,8 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.SavedStateHandle
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
 import com.example.stayout.domain.model.FacilityDomainModel
+import com.example.stayout.domain.model.InternetConnectionError
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.usecase.GetPropertiesUseCase
@@ -101,7 +103,10 @@ class ExploreSectionTest {
 
     @Test
     fun `error state displays the error message`() {
-        val vm = viewModelWith(Result.failure(RuntimeException("No internet connection.")))
+        val vm =
+            viewModelWith(
+                Result.failure(InternetConnectionException(InternetConnectionError.NoConnection)),
+            )
 
         rule.setContent {
             StayScoutTheme {
@@ -109,7 +114,7 @@ class ExploreSectionTest {
             }
         }
 
-        rule.onNodeWithText("No internet connection.").assertIsDisplayed()
+        rule.onNodeWithText("No internet connection. Check your network and try again.").assertIsDisplayed()
     }
 
     @Test

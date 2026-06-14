@@ -9,6 +9,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.example.stayout.domain.model.InternetConnectionError
 import com.example.stayout.presentation.components.BasicAppBar
 import com.example.stayout.presentation.components.BottomActionBar
 import com.example.stayout.presentation.components.ErrorState
@@ -19,6 +21,7 @@ import com.example.stayout.presentation.preview.PreviewData.previewProperty
 import com.example.stayout.presentation.preview.PreviewData.previewRates
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
+import com.example.stayout.presentation.util.toMessageRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +50,7 @@ internal fun PropertyDetailScaffold(
                 is PropertyDetailState.Loading -> PropertyDetailSkeleton()
                 is PropertyDetailState.Error ->
                     ErrorState(
-                        message = state.message,
+                        message = stringResource(state.error.toMessageRes()),
                         onRetry = { onIntent(PropertyDetailIntent.Retry) },
                     )
                 is PropertyDetailState.Success ->
@@ -77,7 +80,7 @@ private fun PropertyDetailSkeletonPreview() {
 private fun PropertyDetailErrorPreview() {
     StayScoutTheme {
         PropertyDetailScaffold(
-            state = PropertyDetailState.Error("Property not found"),
+            state = PropertyDetailState.Error(InternetConnectionError.NotFound),
             onBack = {},
             onIntent = {},
             snackbarHostState = SnackbarHostState(),

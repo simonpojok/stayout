@@ -19,6 +19,7 @@ import com.example.stayout.data.local.mapper.PropertyEntityToDomainMapper
 import com.example.stayout.data.mapper.CommentToDomainMapper
 import com.example.stayout.data.mapper.ExchangeRatesToDomainMapper
 import com.example.stayout.data.mapper.PropertiesResponseToDomainMapper
+import com.example.stayout.data.mapper.ThrowableToInternetConnectionErrorMapper
 import com.example.stayout.data.mapper.UserDataToEntityMapper
 import com.example.stayout.data.remote.api.CommentApi
 import com.example.stayout.data.remote.api.PropertyApi
@@ -71,6 +72,7 @@ object RepositoryModule {
         propertyDomainToEntity: PropertyDomainToEntityMapper,
         locationEntityToDomain: LocationEntityToDomainMapper,
         locationDomainToEntity: LocationDomainToEntityMapper,
+        throwableToInternetConnectionError: ThrowableToInternetConnectionErrorMapper,
     ): PropertyRepository =
         PropertyRepositoryImpl(
             api = api,
@@ -82,6 +84,7 @@ object RepositoryModule {
             propertyDomainToEntity = propertyDomainToEntity,
             locationEntityToDomain = locationEntityToDomain,
             locationDomainToEntity = locationDomainToEntity,
+            throwableToInternetConnectionError = throwableToInternetConnectionError,
         )
 
     @Provides

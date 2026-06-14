@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.stayout.domain.model.AnalyticsEvent
 import com.example.stayout.domain.model.ExchangeRatesDomainModel
+import com.example.stayout.domain.model.InternetConnectionError
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.usecase.GetExchangeRatesUseCase
 import com.example.stayout.domain.usecase.GetPropertyByIdUseCase
 import com.example.stayout.domain.usecase.ObserveNetworkStatusUseCase
@@ -77,27 +79,33 @@ class PropertyDetailViewModel
                 val propertyDeferred = async { getPropertyByIdUseCase(propertyId) }
                 val ratesDeferred = async { getExchangeRatesUseCase() }
 
-                val property = propertyDeferred.await()
+                val propertyResult = propertyDeferred.await()
                 val ratesResult = ratesDeferred.await()
 
-                if (property == null) {
-                    updateState { PropertyDetailState.Error("Property not found") }
-                    return@launch
-                }
+                propertyResult
+                    .onSuccess { property ->
+                        if (property == null) {
+                            updateState { PropertyDetailState.Error(InternetConnectionError.NotFound) }
+                            return@launch
+                        }
 
-                val rates =
-                    ratesResult.getOrNull() ?: ExchangeRatesDomainModel(
-                        usd = BigDecimal.ONE,
-                        gbp = BigDecimal.ONE,
-                    )
+                        val rates =
+                            ratesResult.getOrNull() ?: ExchangeRatesDomainModel(
+                                usd = BigDecimal.ONE,
+                                gbp = BigDecimal.ONE,
+                            )
 
-                updateState {
-                    PropertyDetailState.Success(
-                        property = property,
-                        rates = rates,
-                        ratesUnavailable = ratesResult.isFailure,
-                    )
-                }
+                        updateState {
+                            PropertyDetailState.Success(
+                                property = property,
+                                rates = rates,
+                                ratesUnavailable = ratesResult.isFailure,
+                            )
+                        }
+                    }.onFailure { e ->
+                        val error = (e as? InternetConnectionException)?.error ?: InternetConnectionError.Unknown
+                        updateState { PropertyDetailState.Error(error) }
+                    }
             }
         }
 

@@ -27,6 +27,7 @@ import com.example.stayout.presentation.components.PropertyCard
 import com.example.stayout.presentation.components.loadingMoreItems
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
+import com.example.stayout.presentation.util.toMessageRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +58,7 @@ internal fun ExploreSection(
 
             is ExploreState.Error ->
                 ErrorState(
-                    message = currentState.message,
+                    message = stringResource(currentState.error.toMessageRes()),
                     onRetry = { viewModel.onIntent(ExploreIntent.Load) },
                 )
 

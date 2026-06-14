@@ -20,9 +20,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import coil.compose.AsyncImage
 import com.example.stayout.presentation.R
 import com.example.stayout.presentation.components.FeaturedBadge
+import com.example.stayout.presentation.components.NetworkImage
 import com.example.stayout.presentation.theme.Dimens
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
@@ -42,7 +42,7 @@ internal fun PropertyImageCarousel(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
         ) { page ->
-            AsyncImage(
+            NetworkImage(
                 model = urls[page],
                 contentDescription = stringResource(R.string.cd_hero_image_format, name),
                 modifier = Modifier.fillMaxSize(),

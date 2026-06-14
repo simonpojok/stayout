@@ -6,6 +6,8 @@ import com.example.stayout.domain.model.CurrencyDomainModel
 import com.example.stayout.domain.model.ExchangeRatesDomainModel
 import com.example.stayout.domain.model.FacilityCategoryDomainModel
 import com.example.stayout.domain.model.FacilityDomainModel
+import com.example.stayout.domain.model.InternetConnectionError
+import com.example.stayout.domain.model.InternetConnectionException
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.domain.usecase.GetExchangeRatesUseCase
 import com.example.stayout.domain.usecase.GetPropertyByIdUseCase
@@ -80,7 +82,7 @@ class PropertyDetailViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        coEvery { getPropertyByIdUseCase(propertyId) } returns property
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(property)
         coEvery { getExchangeRatesUseCase() } returns Result.success(rates)
         coEvery { observeNetworkStatusUseCase() } returns flowOf(true)
         viewModel = createViewModel()
@@ -114,13 +116,27 @@ class PropertyDetailViewModelTest {
 
     @Test
     fun `load shows Error when property is not found`() {
-        coEvery { getPropertyByIdUseCase(propertyId) } returns null
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(null)
 
         val vm = createViewModel()
         val state = vm.state.value
 
         assertTrue(state is PropertyDetailState.Error)
-        assertEquals("Property not found", (state as PropertyDetailState.Error).message)
+        assertEquals(InternetConnectionError.NotFound, (state as PropertyDetailState.Error).error)
+    }
+
+    @Test
+    fun `load shows Error when getPropertyByIdUseCase fails`() {
+        coEvery { getPropertyByIdUseCase(propertyId) } returns
+            Result.failure(
+                InternetConnectionException(InternetConnectionError.NoConnection, RuntimeException("Network error")),
+            )
+
+        val vm = createViewModel()
+        val state = vm.state.value
+
+        assertTrue(state is PropertyDetailState.Error)
+        assertEquals(InternetConnectionError.NoConnection, (state as PropertyDetailState.Error).error)
     }
 
     @Test
@@ -164,11 +180,11 @@ class PropertyDetailViewModelTest {
 
     @Test
     fun `Retry reloads data after an error`() {
-        coEvery { getPropertyByIdUseCase(propertyId) } returns null
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(null)
         val vm = createViewModel()
         assertTrue(vm.state.value is PropertyDetailState.Error)
 
-        coEvery { getPropertyByIdUseCase(propertyId) } returns property
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(property)
         vm.onIntent(PropertyDetailIntent.Retry)
 
         assertTrue(vm.state.value is PropertyDetailState.Success)
@@ -230,7 +246,7 @@ class PropertyDetailViewModelTest {
 
     @Test
     fun `SelectCurrency is ignored when state is not Success`() {
-        coEvery { getPropertyByIdUseCase(propertyId) } returns null
+        coEvery { getPropertyByIdUseCase(propertyId) } returns Result.success(null)
         val vm = createViewModel()
         assertTrue(vm.state.value is PropertyDetailState.Error)
 

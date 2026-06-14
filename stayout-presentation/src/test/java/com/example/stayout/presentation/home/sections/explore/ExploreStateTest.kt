@@ -1,5 +1,6 @@
 package com.example.stayout.presentation.home.sections.explore
 
+import com.example.stayout.domain.model.InternetConnectionError
 import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import org.junit.Assert.assertEquals
@@ -109,8 +110,8 @@ class ExploreStateTest {
     }
 
     @Test
-    fun `Error state holds the provided message`() {
-        val state = ExploreState.Error("Network error")
-        assertEquals("Network error", state.message)
+    fun `Error state holds the provided error`() {
+        val state = ExploreState.Error(InternetConnectionError.NoConnection)
+        assertEquals(InternetConnectionError.NoConnection, state.error)
     }
 }

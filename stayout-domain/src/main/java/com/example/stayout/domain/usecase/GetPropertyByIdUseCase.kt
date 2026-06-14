@@ -7,11 +7,11 @@ import kotlinx.coroutines.Dispatchers
 
 abstract class GetPropertyByIdUseCase(
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : BaseUseCase<Int, PropertyDomainModel?>(dispatcher)
+) : BaseUseCase<Int, Result<PropertyDomainModel?>>(dispatcher)
 
 class GetPropertyByIdUseCaseImpl(
     private val repository: PropertyRepository,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : GetPropertyByIdUseCase(dispatcher) {
-    override suspend fun execute(params: Int): PropertyDomainModel? = repository.getPropertyById(params)
+    override suspend fun execute(params: Int): Result<PropertyDomainModel?> = repository.getPropertyById(params)
 }
