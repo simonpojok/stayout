@@ -126,6 +126,7 @@
     <!-- Offline banner -->
     <string name="banner_offline_message">You\'re offline — showing cached data</string>
     <string name="banner_back_online_message">Back online</string>
+    <string name="property_last_updated_format">Data last updated %1$s</string>
 
     <!-- Detail screen — rating breakdown -->
     <string name="label_rating_breakdown">Rating Breakdown</string>

@@ -22,6 +22,7 @@ import com.example.stayout.presentation.preview.PreviewData.previewRates
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
 import com.example.stayout.presentation.util.toMessageRes
+import com.example.stayout.presentation.util.toRelativeTimeString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +32,8 @@ internal fun PropertyDetailScaffold(
     onIntent: (PropertyDetailIntent) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
-    val propertyName = (state as? PropertyDetailState.Success)?.property?.name ?: ""
+    val successState = state as? PropertyDetailState.Success
+    val propertyName = successState?.property?.name ?: ""
     val isLoading = state is PropertyDetailState.Loading
 
     Scaffold(
@@ -45,7 +47,10 @@ internal fun PropertyDetailScaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            OfflineBanner(visible = (state as? PropertyDetailState.Success)?.isOffline == true)
+            OfflineBanner(
+                visible = successState?.isOffline == true,
+                lastUpdatedAt = successState?.property?.lastUpdatedAt?.toRelativeTimeString(),
+            )
             when (state) {
                 is PropertyDetailState.Loading -> PropertyDetailSkeleton()
                 is PropertyDetailState.Error ->

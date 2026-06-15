@@ -44,6 +44,16 @@ class PropertyRepositoryImpl(
     }
 
     override suspend fun getPropertyById(id: Int): Result<PropertyDomainModel?> {
+        propertyDao.getById(id)?.let {
+            return try {
+                Result.success(propertyEntityToDomain.map(it))
+            } catch (e: Exception) {
+                Result.failure(InternetConnectionException(throwableToInternetConnectionError.map(e), e))
+            }
+        }
+
+        // Cache miss: same network call as getProperties() (already tracked as LOAD_PROPERTIES),
+        // but also tag it as LOAD_DETAILS since a detail view is what triggered this fetch.
         val start = System.currentTimeMillis()
         return getProperties()
             .map { (_, properties) -> properties.find { it.id == id } }
@@ -55,9 +65,10 @@ class PropertyRepositoryImpl(
     }
 
     private suspend fun persist(result: Pair<LocationDomainModel, List<PropertyDomainModel>>) {
+        val now = System.currentTimeMillis()
         locationDao.insert(locationDomainToEntity.map(result.first))
         propertyDao.deleteAll()
-        propertyDao.insertAll(result.second.map { propertyDomainToEntity.map(it) })
+        propertyDao.insertAll(result.second.map { propertyDomainToEntity.map(it).copy(lastUpdatedAt = now) })
     }
 
     private suspend fun loadFromCache(): Result<Pair<LocationDomainModel, List<PropertyDomainModel>>>? {

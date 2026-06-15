@@ -1,7 +1,9 @@
 package com.example.stayout.presentation.home.sections.explore
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,11 +25,13 @@ import com.example.stayout.presentation.R
 import com.example.stayout.presentation.components.EmptyState
 import com.example.stayout.presentation.components.ErrorState
 import com.example.stayout.presentation.components.LoadingState
+import com.example.stayout.presentation.components.OfflineBanner
 import com.example.stayout.presentation.components.PropertyCard
 import com.example.stayout.presentation.components.loadingMoreItems
 import com.example.stayout.presentation.theme.PreviewThemes
 import com.example.stayout.presentation.theme.StayScoutTheme
 import com.example.stayout.presentation.util.toMessageRes
+import com.example.stayout.presentation.util.toRelativeTimeString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,48 +93,58 @@ internal fun ExploreSection(
 
                 val pullRefreshState = rememberPullToRefreshState()
 
-                PullToRefreshBox(
-                    isRefreshing = currentState.isRefreshing,
-                    onRefresh = { viewModel.onIntent(ExploreIntent.Refresh) },
-                    state = pullRefreshState,
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    if (currentState.displayedProperties.isEmpty()) {
-                        if (currentState.searchQuery.isNotBlank()) {
-                            EmptyState(
-                                modifier = Modifier.fillMaxSize(),
-                                title = stringResource(R.string.empty_search_title),
-                                message =
-                                    stringResource(
-                                        R.string.empty_search_message,
-                                        currentState.searchQuery,
-                                    ),
-                            )
-                        } else {
-                            EmptyState(
-                                modifier = Modifier.fillMaxSize(),
-                                title = stringResource(R.string.empty_properties_title),
-                                message = stringResource(R.string.empty_properties_message),
-                            )
-                        }
-                    } else {
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier.fillMaxSize(),
-                        ) {
-                            items(
-                                items = currentState.displayedProperties,
-                                key = { it.id },
-                            ) { property ->
-                                PropertyCard(
-                                    property = property,
-                                    onClick = {
-                                        viewModel.onIntent(ExploreIntent.SelectProperty(property))
-                                    },
+                Column(modifier = Modifier.fillMaxSize()) {
+                    OfflineBanner(
+                        visible = currentState.isOffline,
+                        lastUpdatedAt =
+                            currentState.allProperties
+                                .firstOrNull()
+                                ?.lastUpdatedAt
+                                ?.toRelativeTimeString(),
+                    )
+                    PullToRefreshBox(
+                        isRefreshing = currentState.isRefreshing,
+                        onRefresh = { viewModel.onIntent(ExploreIntent.Refresh) },
+                        state = pullRefreshState,
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                    ) {
+                        if (currentState.displayedProperties.isEmpty()) {
+                            if (currentState.searchQuery.isNotBlank()) {
+                                EmptyState(
+                                    modifier = Modifier.fillMaxSize(),
+                                    title = stringResource(R.string.empty_search_title),
+                                    message =
+                                        stringResource(
+                                            R.string.empty_search_message,
+                                            currentState.searchQuery,
+                                        ),
+                                )
+                            } else {
+                                EmptyState(
+                                    modifier = Modifier.fillMaxSize(),
+                                    title = stringResource(R.string.empty_properties_title),
+                                    message = stringResource(R.string.empty_properties_message),
                                 )
                             }
-                            if (currentState.isLoadingMore) {
-                                loadingMoreItems(count = 2)
+                        } else {
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                            ) {
+                                items(
+                                    items = currentState.displayedProperties,
+                                    key = { it.id },
+                                ) { property ->
+                                    PropertyCard(
+                                        property = property,
+                                        onClick = {
+                                            viewModel.onIntent(ExploreIntent.SelectProperty(property))
+                                        },
+                                    )
+                                }
+                                if (currentState.isLoadingMore) {
+                                    loadingMoreItems(count = 2)
+                                }
                             }
                         }
                     }

@@ -36,9 +36,11 @@ class PropertyDetailViewModel
                 "propertyId nav argument is missing"
             }
 
+        private var isOffline = false
+
         init {
-            loadData()
             observeNetworkStatus()
+            loadData()
             track(AnalyticsEvent.ScreenViewed("property_detail"))
         }
 
@@ -65,6 +67,7 @@ class PropertyDetailViewModel
             viewModelScope.launch {
                 observeNetworkStatusUseCase()
                     .onEach { isOnline ->
+                        isOffline = !isOnline
                         updateState {
                             (this as? PropertyDetailState.Success)?.copy(isOffline = !isOnline) ?: this
                         }
@@ -100,6 +103,7 @@ class PropertyDetailViewModel
                                 property = property,
                                 rates = rates,
                                 ratesUnavailable = ratesResult.isFailure,
+                                isOffline = isOffline,
                             )
                         }
                     }.onFailure { e ->

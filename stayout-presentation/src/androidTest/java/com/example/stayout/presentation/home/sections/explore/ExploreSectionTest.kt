@@ -46,7 +46,7 @@ class ExploreSectionTest {
             thumbnailUrl = null,
             address = "2-12 Lord Edward St",
             type = "Hostel",
-            facilities = listOf(FacilityCategoryDomainModel("Amenities", listOf())),
+            facilities = listOf(FacilityCategoryDomainModel(name = "Amenities", facilities = listOf())),
             freeCancellationAvailable = true,
         )
 
@@ -109,6 +109,37 @@ class ExploreSectionTest {
         }
 
         rule.onNodeWithText("No properties available").assertIsDisplayed()
+    }
+
+    @Test
+    fun `offline success state shows offline banner with last updated time`() {
+        val staleProperty = property.copy(lastUpdatedAt = System.currentTimeMillis() - 60_000)
+        coEvery { observeNetworkStatusUseCase() } returns flowOf(false)
+        coEvery { getPropertiesUseCase() } returns Result.success(location to listOf(staleProperty))
+        val vm =
+            ExploreViewModel(getPropertiesUseCase, observeNetworkStatusUseCase, savedStateHandle, trackEventUseCase)
+
+        rule.setContent {
+            StayScoutTheme {
+                ExploreSection(searchQuery = "", onNavigateToDetail = {}, viewModel = vm)
+            }
+        }
+
+        rule.onNodeWithText("You're offline", substring = true).assertIsDisplayed()
+        rule.onNodeWithText("Data last updated", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun `online success state does not show offline banner`() {
+        val vm = viewModelWith(Result.success(location to listOf(property)))
+
+        rule.setContent {
+            StayScoutTheme {
+                ExploreSection(searchQuery = "", onNavigateToDetail = {}, viewModel = vm)
+            }
+        }
+
+        rule.onNodeWithText("You're offline", substring = true).assertDoesNotExist()
     }
 
     @Test

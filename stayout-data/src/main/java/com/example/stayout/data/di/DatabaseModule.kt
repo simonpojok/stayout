@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.example.stayout.data.local.StayScoutDatabase
 import com.example.stayout.data.local.migration.Migration1To2
+import com.example.stayout.data.local.migration.Migration2To3
+import com.example.stayout.data.local.migration.Migration3To4
 import com.example.stayout.data.security.DatabasePassphraseRepository
 import dagger.Module
 import dagger.Provides
@@ -29,7 +31,7 @@ object DatabaseModule {
         return Room
             .databaseBuilder(context, StayScoutDatabase::class.java, "stayscout.db")
             .openHelperFactory(factory)
-            .addMigrations(Migration1To2())
+            .addMigrations(Migration1To2(), Migration2To3(), Migration3To4())
             .build()
     }
 }

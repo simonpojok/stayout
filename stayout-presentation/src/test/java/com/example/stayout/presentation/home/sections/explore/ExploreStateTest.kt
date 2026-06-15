@@ -104,9 +104,10 @@ class ExploreStateTest {
     }
 
     @Test
-    fun `Loading state is distinct singleton`() {
-        val state: ExploreState = ExploreState.Loading
+    fun `Loading state defaults to online`() {
+        val state: ExploreState = ExploreState.Loading()
         assertTrue(state is ExploreState.Loading)
+        assertFalse(state.isOffline)
     }
 
     @Test

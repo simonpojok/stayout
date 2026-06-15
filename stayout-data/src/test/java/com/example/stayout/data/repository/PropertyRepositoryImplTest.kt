@@ -104,6 +104,7 @@ class PropertyRepositoryImplTest {
         every { locationDomainToEntity.map(stubLocation) } returns stubLocationEntity
         every { propertyDomainToEntity.map(stubProperty) } returns stubPropertyEntity
         coEvery { locationDao.get() } returns null
+        coEvery { propertyDao.getById(any()) } returns null
     }
 
     @Test
@@ -237,5 +238,57 @@ class PropertyRepositoryImplTest {
             repository.getPropertyById(1)
 
             verify { statsRepository.trackEvent(StatsEvent.LOAD_DETAILS, any()) }
+        }
+
+    @Test
+    fun `getPropertyById returns cached entity without calling the API`() =
+        runTest {
+            coEvery { propertyDao.getById(1) } returns stubPropertyEntity
+            every { propertyEntityToDomain.map(stubPropertyEntity) } returns stubProperty
+
+            val result = repository.getPropertyById(1)
+
+            assertTrue(result.isSuccess)
+            assertEquals(stubProperty, result.getOrNull())
+            coVerify(exactly = 0) { api.getProperties() }
+        }
+
+    @Test
+    fun `getPropertyById returns failure instead of throwing when cached entity mapping fails`() =
+        runTest {
+            val exception = RuntimeException("Corrupted cache row")
+            coEvery { propertyDao.getById(1) } returns stubPropertyEntity
+            every { propertyEntityToDomain.map(stubPropertyEntity) } throws exception
+            every { throwableToInternetConnectionError.map(exception) } returns InternetConnectionError.Unknown
+
+            val result = repository.getPropertyById(1)
+
+            assertTrue(result.isFailure)
+            val failure = result.exceptionOrNull()
+            assertTrue(failure is InternetConnectionException)
+            assertEquals(InternetConnectionError.Unknown, (failure as InternetConnectionException).error)
+            assertEquals(exception, failure.cause)
+        }
+
+    @Test
+    fun `getPropertyById does not track stats when served from cache`() =
+        runTest {
+            coEvery { propertyDao.getById(1) } returns stubPropertyEntity
+            every { propertyEntityToDomain.map(stubPropertyEntity) } returns stubProperty
+
+            repository.getPropertyById(1)
+
+            verify(exactly = 0) { statsRepository.trackEvent(any(), any()) }
+        }
+
+    @Test
+    fun `persist stamps lastUpdatedAt on cached properties`() =
+        runTest {
+            coEvery { api.getProperties() } returns stubResponse
+            every { mapper.map(stubResponse) } returns stubResult
+
+            repository.getProperties()
+
+            coVerify { propertyDao.insertAll(match { it.all { entity -> entity.lastUpdatedAt > 0L } }) }
         }
 }
