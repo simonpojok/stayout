@@ -21,7 +21,7 @@ import com.example.stayout.data.local.entity.UserEntity
         CommentEntity::class,
         UserEntity::class,
     ],
-    version = 2,
+    version = 4,
     exportSchema = false,
 )
 abstract class StayScoutDatabase : RoomDatabase() {

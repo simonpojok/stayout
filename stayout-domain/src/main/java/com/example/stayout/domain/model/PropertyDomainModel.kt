@@ -35,6 +35,7 @@ data class PropertyDomainModel(
     val starRating: Int = 0,
     val freeCancellationUntil: String? = null,
     val minimumStayDescription: String? = null,
+    val lastUpdatedAt: Long? = null,
 )
 
 fun PropertyDomainModel.priceIn(
