@@ -117,6 +117,18 @@ class CommentRepositoryImplTest {
     }
 
     @Test
+    fun `falls back to cache when users API returns an empty list`() {
+        every { api.getComments(postId) } returns Single.just(listOf(commentDto))
+        every { api.getUsers() } returns Single.just(emptyList())
+        coEvery { commentDao.getByPostId(postId) } returns emptyList()
+        coEvery { userDao.getAll() } returns emptyList()
+
+        val result = repository.getComments(postId).blockingGet()
+
+        assertEquals(emptyList<CommentDomainModel>(), result)
+    }
+
+    @Test
     fun `cycles through users when comment count exceeds user count`() {
         val comments =
             (1..3).map { i ->

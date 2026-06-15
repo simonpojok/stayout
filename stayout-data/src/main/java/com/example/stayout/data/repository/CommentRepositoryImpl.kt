@@ -32,6 +32,7 @@ class CommentRepositoryImpl(
                 api.getUsers().subscribeOn(Schedulers.io()),
             ) { comments, users -> Pair(comments, users) }
             .doOnSuccess { (comments, users) ->
+                if (users.isEmpty()) return@doOnSuccess
                 scope.launch(Dispatchers.IO) {
                     userDao.insertAll(users.map(userDataToEntity::map))
                     val entities =
@@ -47,6 +48,7 @@ class CommentRepositoryImpl(
                     commentDao.insertAll(entities)
                 }
             }.map { (comments, users) ->
+                if (users.isEmpty()) throw IllegalStateException("No users returned")
                 comments.map { comment ->
                     mapper.map(comment, users[(comment.id - 1) % users.size])
                 }

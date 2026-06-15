@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +37,7 @@ private val BannerTextColor = Color(0xFF1A1A1A)
 fun OfflineBanner(
     visible: Boolean,
     modifier: Modifier = Modifier,
+    lastUpdatedAt: CharSequence? = null,
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -59,11 +61,20 @@ fun OfflineBanner(
                 modifier = Modifier.size(18.dp),
             )
             Spacer(modifier = Modifier.width(Dimens.spacing8))
-            Text(
-                text = stringResource(R.string.banner_offline_message),
-                style = MaterialTheme.typography.labelMedium,
-                color = BannerTextColor,
-            )
+            Column {
+                Text(
+                    text = stringResource(R.string.banner_offline_message),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = BannerTextColor,
+                )
+                if (lastUpdatedAt != null) {
+                    Text(
+                        text = stringResource(R.string.property_last_updated_format, lastUpdatedAt),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = BannerTextColor,
+                    )
+                }
+            }
         }
     }
 }
@@ -73,5 +84,13 @@ fun OfflineBanner(
 private fun OfflineBannerPreview() {
     StayScoutTheme {
         OfflineBanner(visible = true)
+    }
+}
+
+@PreviewThemes
+@Composable
+private fun OfflineBannerWithLastUpdatedPreview() {
+    StayScoutTheme {
+        OfflineBanner(visible = true, lastUpdatedAt = "2 hours ago")
     }
 }
