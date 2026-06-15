@@ -25,7 +25,7 @@ class ExploreViewModel
         private val savedStateHandle: SavedStateHandle,
         private val trackEventUseCase: TrackEventUseCase,
     ) : BaseViewModel<ExploreState, ExploreIntent, ExploreEvent>(
-            initialState = ExploreState.Loading,
+            initialState = ExploreState.Loading(),
         ) {
         val scrollIndex: Int
             get() = savedStateHandle.get<Int>(KEY_SCROLL_INDEX) ?: 0
@@ -69,7 +69,11 @@ class ExploreViewModel
                 observeNetworkStatusUseCase()
                     .onEach { isOnline ->
                         updateState {
-                            (this as? ExploreState.Success)?.copy(isOffline = !isOnline) ?: this
+                            when (this) {
+                                is ExploreState.Loading -> copy(isOffline = !isOnline)
+                                is ExploreState.Success -> copy(isOffline = !isOnline)
+                                is ExploreState.Error -> copy(isOffline = !isOnline)
+                            }
                         }
                     }.launchIn(this)
             }
@@ -77,7 +81,7 @@ class ExploreViewModel
 
         private fun loadProperties() {
             viewModelScope.launch {
-                updateState { ExploreState.Loading }
+                updateState { ExploreState.Loading(isOffline = isOffline) }
                 getPropertiesUseCase()
                     .onSuccess { (location, properties) ->
                         updateState {
@@ -85,11 +89,12 @@ class ExploreViewModel
                                 location = location,
                                 allProperties = properties,
                                 pageEnd = PAGE_SIZE,
+                                isOffline = isOffline,
                             )
                         }
                     }.onFailure { e ->
                         val error = (e as? InternetConnectionException)?.error ?: InternetConnectionError.Unknown
-                        updateState { ExploreState.Error(error) }
+                        updateState { ExploreState.Error(error, isOffline = isOffline) }
                     }
             }
         }
@@ -106,6 +111,7 @@ class ExploreViewModel
                                 location = location,
                                 allProperties = properties,
                                 pageEnd = PAGE_SIZE,
+                                isOffline = isOffline,
                             )
                         }
                     }.onFailure {

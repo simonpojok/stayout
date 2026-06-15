@@ -5,8 +5,12 @@ import com.example.stayout.domain.model.LocationDomainModel
 import com.example.stayout.domain.model.PropertyDomainModel
 import com.example.stayout.presentation.base.BaseState
 
-sealed interface ExploreState : BaseState {
-    data object Loading : ExploreState
+sealed class ExploreState(
+    open val isOffline: Boolean = false,
+) : BaseState {
+    data class Loading(
+        override val isOffline: Boolean = false,
+    ) : ExploreState(isOffline)
 
     data class Success(
         val location: LocationDomainModel,
@@ -15,8 +19,8 @@ sealed interface ExploreState : BaseState {
         val searchQuery: String = "",
         val isRefreshing: Boolean = false,
         val isLoadingMore: Boolean = false,
-        val isOffline: Boolean = false,
-    ) : ExploreState {
+        override val isOffline: Boolean = false,
+    ) : ExploreState(isOffline) {
         val displayedProperties: List<PropertyDomainModel>
             get() =
                 if (searchQuery.isBlank()) {
@@ -31,5 +35,6 @@ sealed interface ExploreState : BaseState {
 
     data class Error(
         val error: InternetConnectionError,
-    ) : ExploreState
+        override val isOffline: Boolean = false,
+    ) : ExploreState(isOffline)
 }

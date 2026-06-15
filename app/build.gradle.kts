@@ -149,6 +149,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
+    implementation(libs.rxjava3)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)

@@ -95,7 +95,9 @@ fun HomeScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
         ) {
-            OfflineBanner(visible = readyState?.isOffline == true)
+            OfflineBanner(
+                visible = readyState?.isOffline == true && currentRoute != BottomNavTab.Explore.route,
+            )
             NavHost(
                 navController = tabNavController,
                 startDestination = BottomNavTab.Explore.route,
